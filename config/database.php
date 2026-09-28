@@ -3,28 +3,36 @@
 class Database
 {
     private $host = "localhost";
-    private $db = "db_peminjaman_olahraga";
-    private $user = "root";
-    private $pass = "";
+    private $db_name = "db_peminjaman_olahraga";
+    private $username = "root";
+    private $password = "";
+    private $conn;
 
     public function connect()
     {
+        $this->conn = null;
+
         try {
-            $conn = new PDO(
-                "mysql:host=$this->host;dbname=$this->db",
-                $this->user,
-                $this->pass
+            $this->conn = new PDO(
+                "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=utf8mb4",
+                $this->username,
+                $this->password
             );
 
-            $conn->setAttribute(
+            $this->conn->setAttribute(
                 PDO::ATTR_ERRMODE,
                 PDO::ERRMODE_EXCEPTION
             );
 
-            return $conn;
+            $this->conn->setAttribute(
+                PDO::ATTR_DEFAULT_FETCH_MODE,
+                PDO::FETCH_ASSOC
+            );
 
         } catch (PDOException $e) {
-            die("Koneksi gagal: " . $e->getMessage());
+            die("Koneksi database gagal: " . $e->getMessage());
         }
+
+        return $this->conn;
     }
 }

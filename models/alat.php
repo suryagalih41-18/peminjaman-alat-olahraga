@@ -9,37 +9,70 @@ class Alat
         $this->db = (new Database())->connect();
     }
 
-    // =========================
-    // MENAMPILKAN SEMUA ALAT
-    // =========================
-
+    // Menampilkan semua data alat
     public function getAll()
     {
-        $query = $this->db->prepare(
-            "SELECT * FROM alat ORDER BY id ASC"
-        );
+        $query = $this->db->prepare("
+            SELECT
+                alat.*,
+                kategori.nama_kategori
+            FROM alat
+            LEFT JOIN kategori
+                ON alat.kategori_id = kategori.id
+            ORDER BY alat.id DESC
+        ");
 
         $query->execute();
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Mengambil satu data alat
+    public function getById($id)
+    {
+        $query = $this->db->prepare("
+            SELECT *
+            FROM alat
+            WHERE id = ?
+        ");
 
-    // =========================
-    // TAMBAH ALAT
-    // =========================
+        $query->execute([$id]);
 
+        return $query->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Menghitung total alat
+    public function getTotal()
+    {
+        $query = $this->db->prepare("
+            SELECT COUNT(*) AS total
+            FROM alat
+        ");
+
+        $query->execute();
+
+        $data = $query->fetch(PDO::FETCH_ASSOC);
+
+        return $data['total'] ?? 0;
+    }
+
+    // Tambah alat
     public function tambah(
         $nama_alat,
         $kategori_id,
         $stok,
         $kondisi
     ) {
-        $query = $this->db->prepare(
-            "INSERT INTO alat
-            (nama_alat, kategori_id, stok, kondisi)
-            VALUES (?, ?, ?, ?)"
-        );
+        $query = $this->db->prepare("
+            INSERT INTO alat
+            (
+                nama_alat,
+                kategori_id,
+                stok,
+                kondisi
+            )
+            VALUES (?, ?, ?, ?)
+        ");
 
         return $query->execute([
             $nama_alat,
@@ -49,11 +82,7 @@ class Alat
         ]);
     }
 
-
-    // =========================
-    // EDIT ALAT
-    // =========================
-
+    // Edit alat
     public function update(
         $id,
         $nama_alat,
@@ -61,14 +90,15 @@ class Alat
         $stok,
         $kondisi
     ) {
-        $query = $this->db->prepare(
-            "UPDATE alat
-            SET nama_alat = ?,
+        $query = $this->db->prepare("
+            UPDATE alat
+            SET
+                nama_alat = ?,
                 kategori_id = ?,
                 stok = ?,
                 kondisi = ?
-            WHERE id = ?"
-        );
+            WHERE id = ?
+        ");
 
         return $query->execute([
             $nama_alat,
@@ -79,30 +109,14 @@ class Alat
         ]);
     }
 
-
-    // =========================
-    // HAPUS ALAT
-    // =========================
-
-    public function delete($id)
+    // Hapus alat
+    public function hapus($id)
     {
-        try {
+        $query = $this->db->prepare("
+            DELETE FROM alat
+            WHERE id = ?
+        ");
 
-            $query = $this->db->prepare(
-                "DELETE FROM alat WHERE id = ?"
-            );
-
-            return $query->execute([$id]);
-
-        } catch (PDOException $e) {
-
-            // Jika alat sudah digunakan di tabel peminjaman
-            if ($e->getCode() == "23000") {
-
-                return false;
-            }
-
-            throw $e;
-        }
+        return $query->execute([$id]);
     }
 }

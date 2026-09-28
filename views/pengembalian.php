@@ -1,385 +1,183 @@
 <?php
 
-if (!isset($_SESSION['user'])) {
-    header("Location: /PEMINJAMAN_ALAT/public/index.php?url=login");
-    exit;
-}
+$active = 'pengembalian';
+$pageTitle = 'Pengembalian Alat';
 
-$user = $_SESSION['user'];
+require_once __DIR__ . '/header.php';
 
-$nama = $user['nama_lengkap'];
+$status = $_GET['status'] ?? '';
 
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
+<?php if ($status === 'berhasil'): ?>
 
-<head>
+<div class="alert alert-success">
+    Pengajuan pengembalian berhasil dikirim.
+</div>
 
-    <meta charset="UTF-8">
+<?php elseif ($status === 'gagal'): ?>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div class="alert alert-danger">
+    Pengajuan pengembalian gagal.
+</div>
 
-    <title>Pengembalian Alat</title>
-
-    <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            background: #F5F7FA;
-        }
-
-        .navbar {
-            height: 70px;
-            background: #263B5A;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-        }
-
-        .logout {
-            background: white;
-            color: #263B5A;
-            padding: 10px 18px;
-            border-radius: 7px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .container {
-            display: flex;
-            min-height: calc(100vh - 70px);
-        }
-
-        .sidebar {
-            width: 240px;
-            background: #314A6E;
-            padding: 25px 15px;
-        }
-
-        .sidebar-title {
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-            font-weight: bold;
-        }
-
-        .menu {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 13px 15px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-        }
-
-        .menu:hover,
-        .menu.active {
-            background: #263B5A;
-        }
-
-        .content {
-            flex: 1;
-            padding: 40px;
-        }
-
-        .content h1 {
-            color: #263B5A;
-            margin-bottom: 10px;
-        }
-
-        .content > p {
-            color: #666;
-            margin-bottom: 25px;
-        }
-
-        .alert {
-            padding: 14px 18px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            background: #E9EEF5;
-            color: #263B5A;
-            font-weight: bold;
-        }
-
-        .table-box {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            border: 1px solid #E1E6ED;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: #263B5A;
-            color: white;
-            padding: 13px;
-            text-align: left;
-        }
-
-        td {
-            padding: 13px;
-            border-bottom: 1px solid #E1E6ED;
-        }
-
-        .btn-kembali {
-            background: #263B5A;
-            color: white;
-            border: none;
-            padding: 9px 15px;
-            border-radius: 7px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-kembali:hover {
-            background: #1c2d45;
-        }
-
-        .empty {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            color: #666;
-        }
-
-    </style>
-
-</head>
-
-<body>
+<?php endif; ?>
 
 
-<div class="navbar">
+<div class="page-card">
 
-    <h2>
-        Peminjaman Alat Olahraga
-    </h2>
+    <h1>Pengembalian Alat</h1>
 
-    <a
-        href="/PEMINJAMAN_ALAT/public/index.php?url=logout"
-        class="logout"
-    >
-        Logout
-    </a>
+    <p>
+        Ajukan pengembalian alat yang sedang dipinjam.
+    </p>
 
 </div>
 
 
-<div class="container">
+<div class="table-card">
 
+<table>
 
-    <div class="sidebar">
+<thead>
 
-        <div class="sidebar-title">
-            MENU
-        </div>
+<tr>
+    <th>No</th>
+    <th>Nama Alat</th>
+    <th>Jumlah</th>
+    <th>Tanggal Pinjam</th>
+    <th>Rencana Kembali</th>
+    <th>Status</th>
+    <th>Aksi</th>
+</tr>
 
+</thead>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=dashboard"
-            class="menu"
-        >
-            Dashboard
-        </a>
+<tbody>
 
+<?php if (!empty($peminjaman)): ?>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=alat"
-            class="menu"
-        >
-            Daftar Alat
-        </a>
+<?php $no = 1; ?>
 
+<?php foreach ($peminjaman as $row): ?>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=pengajuan"
-            class="menu"
-        >
-            Ajukan Peminjaman
-        </a>
+<tr>
 
+    <td><?= $no++ ?></td>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=pengembalian"
-            class="menu active"
-        >
-            Pengembalian
-        </a>
+    <td>
+        <?= htmlspecialchars($row['nama_alat']) ?>
+    </td>
 
+    <td>
+        <?= htmlspecialchars($row['jumlah']) ?>
+    </td>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=riwayat"
-            class="menu"
-        >
-            Riwayat Peminjaman
-        </a>
+    <td>
+        <?= htmlspecialchars($row['tanggal_pinjam']) ?>
+    </td>
 
+    <td>
+        <?= htmlspecialchars($row['tanggal_rencana_kembali']) ?>
+    </td>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=logout"
-            class="menu"
-        >
-            Logout
-        </a>
+    <td>
 
-    </div>
+        <?php if ($row['status'] === 'dikembalikan'): ?>
 
+            <span class="badge badge-success">
+                Dikembalikan
+            </span>
 
-    <div class="content">
+        <?php elseif ($row['status'] === 'menunggu_pengembalian'): ?>
 
-        <h1>
-            Pengembalian Alat
-        </h1>
+            <span class="badge badge-warning">
+                Menunggu Petugas
+            </span>
 
-        <p>
-            Daftar alat yang sedang kamu pinjam.
-        </p>
+        <?php elseif ($row['status'] === 'disetujui'): ?>
 
+            <span class="badge badge-success">
+                Sedang Dipinjam
+            </span>
 
-        <?php if (isset($_GET['status']) && $_GET['status'] === 'berhasil'): ?>
+        <?php elseif ($row['status'] === 'diajukan'): ?>
 
-            <div class="alert">
-                Alat berhasil dikembalikan.
-            </div>
+            <span class="badge badge-warning">
+                Menunggu Persetujuan
+            </span>
 
-        <?php endif; ?>
+        <?php elseif ($row['status'] === 'ditolak'): ?>
 
-
-        <?php if (isset($_GET['status']) && $_GET['status'] === 'gagal'): ?>
-
-            <div class="alert">
-                Pengembalian gagal. Silakan coba lagi.
-            </div>
-
-        <?php endif; ?>
-
-
-        <?php if (empty($dataPeminjaman)): ?>
-
-            <div class="empty">
-                Tidak ada alat yang sedang dipinjam.
-            </div>
+            <span class="badge badge-danger">
+                Ditolak
+            </span>
 
         <?php else: ?>
 
-            <div class="table-box">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>No</th>
-                            <th>Nama Alat</th>
-                            <th>Jumlah</th>
-                            <th>Tanggal Pinjam</th>
-                            <th>Rencana Kembali</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        <?php $no = 1; ?>
-
-                        <?php foreach ($dataPeminjaman as $data): ?>
-
-                            <tr>
-
-                                <td>
-                                    <?= $no++; ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $data['nama_alat']
-                                    ); ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $data['jumlah']
-                                    ); ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $data['tanggal_pinjam']
-                                    ); ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $data['tanggal_rencana_kembali']
-                                    ); ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        ucfirst($data['status'])
-                                    ); ?>
-                                </td>
-
-                                <td>
-
-                                    <form
-                                        action="/PEMINJAMAN_ALAT/public/index.php?url=proses-pengembalian"
-                                        method="POST"
-                                    >
-
-                                        <input
-                                            type="hidden"
-                                            name="id"
-                                            value="<?= $data['id']; ?>"
-                                        >
-
-                                        <button
-                                            type="submit"
-                                            class="btn-kembali"
-                                            onclick="return confirm('Apakah alat ini sudah dikembalikan?')"
-                                        >
-                                            Kembalikan
-                                        </button>
-
-                                    </form>
-
-                                </td>
-
-                            </tr>
-
-                        <?php endforeach; ?>
-
-                    </tbody>
-
-                </table>
-
-            </div>
+            <span class="badge">
+                <?= htmlspecialchars($row['status']) ?>
+            </span>
 
         <?php endif; ?>
 
-    </div>
+    </td>
+
+
+    <td>
+
+        <?php if ($row['status'] === 'disetujui'): ?>
+
+            <a
+                href="index.php?url=proses-pengembalian&id=<?= $row['id'] ?>"
+                class="btn btn-secondary btn-small"
+                onclick="return confirm('Ajukan pengembalian alat ini?')">
+                ↩ Ajukan Pengembalian
+            </a>
+
+        <?php elseif ($row['status'] === 'menunggu_pengembalian'): ?>
+
+            <span style="font-size:12px;color:#8a96a7;">
+                Pengembalian sedang diproses
+            </span>
+
+        <?php elseif ($row['status'] === 'dikembalikan'): ?>
+
+            <span style="font-size:12px;color:#3d8b62;">
+                ✓ Sudah dikembalikan
+            </span>
+
+        <?php else: ?>
+
+            <span style="font-size:12px;color:#8a96a7;">
+                -
+            </span>
+
+        <?php endif; ?>
+
+    </td>
+
+</tr>
+
+<?php endforeach; ?>
+
+<?php else: ?>
+
+<tr>
+
+<td colspan="7" class="empty">
+    Tidak ada alat yang sedang dipinjam.
+</td>
+
+</tr>
+
+<?php endif; ?>
+
+</tbody>
+
+</table>
 
 </div>
 
-</body>
 
-</html>
+<?php require_once __DIR__ . '/footer.php'; ?>

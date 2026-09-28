@@ -9,11 +9,10 @@ class User
         $this->db = (new Database())->connect();
     }
 
-    // LOGIN
     public function login($username, $password)
     {
         $query = $this->db->prepare(
-            "SELECT * FROM users WHERE username = ?"
+            "SELECT * FROM users WHERE username = ? LIMIT 1"
         );
 
         $query->execute([$username]);
@@ -27,30 +26,34 @@ class User
         return false;
     }
 
-    // REGISTER
-    public function register($username, $password, $nama_lengkap)
-    {
-        // Cek username sudah digunakan atau belum
-        $query = $this->db->prepare(
-            "SELECT * FROM users WHERE username = ?"
+    public function register(
+        $username,
+        $password,
+        $nama_lengkap
+    ) {
+        $cek = $this->db->prepare(
+            "SELECT id FROM users WHERE username = ?"
         );
 
-        $query->execute([$username]);
+        $cek->execute([$username]);
 
-        if ($query->fetch()) {
+        if ($cek->fetch()) {
             return false;
         }
 
-        // Hash password
         $passwordHash = password_hash(
             $password,
             PASSWORD_DEFAULT
         );
 
-        // Simpan user baru
         $query = $this->db->prepare(
-            "INSERT INTO users 
-            (username, password, nama_lengkap, role)
+            "INSERT INTO users
+            (
+                username,
+                password,
+                nama_lengkap,
+                role
+            )
             VALUES (?, ?, ?, 'peminjam')"
         );
 
@@ -59,5 +62,19 @@ class User
             $passwordHash,
             $nama_lengkap
         ]);
+    }
+
+    public function getPeminjam()
+    {
+        $query = $this->db->prepare(
+            "SELECT *
+             FROM users
+             WHERE role = 'peminjam'
+             ORDER BY id DESC"
+        );
+
+        $query->execute();
+
+        return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 }

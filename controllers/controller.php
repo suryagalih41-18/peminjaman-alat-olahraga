@@ -1,439 +1,484 @@
 <?php
 
-// ==========================================
-// CONTROLLER AUTH
-// ==========================================
-
 class AuthController
 {
     public function login()
     {
-        require "../views/login.php";
-    }
+        if (isset($_SESSION['user'])) {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
 
+        require_once __DIR__ . '/../views/login.php';
+    }
 
     public function prosesLogin()
     {
-        $username = $_POST['username'];
-        $password = $_POST['password'];
+        $username = $_POST['username'] ?? '';
+        $password = $_POST['password'] ?? '';
 
-        $userModel = new User();
+        $model = new User();
 
-        $user = $userModel->login(
+        $user = $model->login(
             $username,
             $password
         );
 
         if ($user) {
 
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-
             $_SESSION['user'] = $user;
 
-            header(
-                "Location: /PEMINJAMAN_ALAT/public/index.php?url=dashboard"
-            );
-
+            header("Location: index.php?url=dashboard");
             exit;
-
-        } else {
-
-            $error = "Username atau password salah!";
-
-            require "../views/login.php";
         }
-    }
 
+        header(
+            "Location: index.php?url=login&status=gagal"
+        );
+
+        exit;
+    }
 
     public function register()
     {
-        require "../views/register.php";
+        require_once __DIR__ . '/../views/register.php';
     }
-
 
     public function prosesRegister()
     {
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-        $konfirmasi = $_POST['konfirmasi_password'];
-        $nama_lengkap = $_POST['nama_lengkap'];
-
-
-        if ($password != $konfirmasi) {
-
-            $error = "Konfirmasi password tidak sama!";
-
-            require "../views/register.php";
-
-            return;
-        }
-
-
-        $userModel = new User();
-
+        $username = $_POST['username'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $konfirmasi = $_POST['konfirmasi_password'] ?? '';
+        $nama = $_POST['nama_lengkap'] ?? '';
 
         if (
-            $userModel->register(
+            empty($username) ||
+            empty($password) ||
+            empty($nama)
+        ) {
+            header(
+                "Location: index.php?url=register&status=gagal"
+            );
+            exit;
+        }
+
+        if ($password !== $konfirmasi) {
+            header(
+                "Location: index.php?url=register&status=password"
+            );
+            exit;
+        }
+
+        $model = new User();
+
+        if (
+            $model->register(
                 $username,
                 $password,
-                $nama_lengkap
+                $nama
             )
         ) {
-
             header(
-                "Location: index.php?url=login&success=1"
+                "Location: index.php?url=login&status=register"
             );
-
             exit;
-
-        } else {
-
-            $error = "Registrasi gagal!";
-
-            require "../views/register.php";
         }
+
+        header(
+            "Location: index.php?url=register&status=gagal"
+        );
+
+        exit;
     }
 }
 
-
-
-// ==========================================
-// CONTROLLER DATA ALAT
-// ==========================================
 
 class AlatController
 {
-    public function index()
+    private function cekAdmin()
     {
-        $alatModel = new Alat();
-
-        $dataAlat = $alatModel->getAll();
-
-        require "../views/alat.php";
+        if (
+            !isset($_SESSION['user']) ||
+            $_SESSION['user']['role'] !== 'admin'
+        ) {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
     }
 
+    public function index()
+    {
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
 
-    // ======================================
-    // TAMBAH ALAT
-    // ======================================
+        $model = new Alat();
+
+        $alat = $model->getAll();
+
+        require_once __DIR__ . '/../views/alat.php';
+    }
 
     public function tambah()
     {
-        require "../views/alat_tambah.php";
-    }
+        $this->cekAdmin();
 
+        $kategoriModel = new Kategori();
+
+        $kategori = $kategoriModel->getAll();
+
+        require_once __DIR__ . '/../views/alat_tambah.php';
+    }
 
     public function prosesTambah()
     {
-        $nama_alat = $_POST['nama_alat'];
-        $kategori_id = $_POST['kategori_id'];
-        $stok = $_POST['stok'];
-        $kondisi = $_POST['kondisi'];
+        $this->cekAdmin();
 
+        $nama = $_POST['nama_alat'] ?? '';
+        $kategori = $_POST['kategori_id'] ?? '';
+        $stok = $_POST['stok'] ?? 0;
+        $kondisi = $_POST['kondisi'] ?? '';
 
-        $alatModel = new Alat();
+        $model = new Alat();
 
-
-        $alatModel->tambah(
-            $nama_alat,
-            $kategori_id,
+        $model->tambah(
+            $nama,
+            $kategori,
             $stok,
             $kondisi
         );
 
-
         header(
-            "Location: index.php?url=alat"
+            "Location: index.php?url=alat&status=berhasil"
         );
 
         exit;
     }
-
-
-    // ======================================
-    // EDIT ALAT
-    // ======================================
 
     public function edit()
     {
-        $id = $_GET['id'];
+        $this->cekAdmin();
 
+        $id = $_GET['id'] ?? 0;
 
-        $alatModel = new Alat();
+        $model = new Alat();
 
-        $dataAlat = $alatModel->getAll();
+        $alat = $model->getById($id);
 
+        $kategoriModel = new Kategori();
 
-        $alat = null;
+        $kategori = $kategoriModel->getAll();
 
-
-        foreach ($dataAlat as $data) {
-
-            if ($data['id'] == $id) {
-
-                $alat = $data;
-
-                break;
-            }
-        }
-
-
-        if (!$alat) {
-
-            header(
-                "Location: index.php?url=alat"
-            );
-
-            exit;
-        }
-
-
-        require "../views/alat_edit.php";
+        require_once __DIR__ . '/../views/alat_edit.php';
     }
-
 
     public function prosesEdit()
     {
-        $id = $_POST['id'];
-        $nama_alat = $_POST['nama_alat'];
-        $kategori_id = $_POST['kategori_id'];
-        $stok = $_POST['stok'];
-        $kondisi = $_POST['kondisi'];
+        $this->cekAdmin();
 
+        $id = $_POST['id'] ?? 0;
+        $nama = $_POST['nama_alat'] ?? '';
+        $kategori = $_POST['kategori_id'] ?? '';
+        $stok = $_POST['stok'] ?? 0;
+        $kondisi = $_POST['kondisi'] ?? '';
 
-        $alatModel = new Alat();
+        $model = new Alat();
 
-
-        $alatModel->update(
+        $model->edit(
             $id,
-            $nama_alat,
-            $kategori_id,
+            $nama,
+            $kategori,
             $stok,
             $kondisi
         );
 
-
         header(
-            "Location: index.php?url=alat"
+            "Location: index.php?url=alat&status=berhasil"
         );
 
         exit;
     }
 
-
-    // ======================================
-    // HAPUS ALAT
-    // ======================================
-
     public function hapus()
     {
-        $id = $_GET['id'];
+        $this->cekAdmin();
 
+        $id = $_GET['id'] ?? 0;
 
-        $alatModel = new Alat();
+        $model = new Alat();
 
+        $model->hapus($id);
 
-        $hasil = $alatModel->delete($id);
+        header(
+            "Location: index.php?url=alat&status=berhasil"
+        );
 
-
-        if ($hasil) {
-
-            header(
-                "Location: index.php?url=alat&hapus=berhasil"
-            );
-
-            exit;
-
-        } else {
-
-            header(
-                "Location: index.php?url=alat&hapus=gagal"
-            );
-
-            exit;
-        }
+        exit;
     }
 }
 
 
+class UserController
+{
+    public static function peminjam()
+    {
+        if (
+            !isset($_SESSION['user']) ||
+            $_SESSION['user']['role'] !== 'admin'
+        ) {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
 
-// ==========================================
-// CONTROLLER PEMINJAMAN
-// ==========================================
+        $model = new User();
+
+        $peminjam = $model->getPeminjam();
+
+        require_once __DIR__ . '/../views/peminjam.php';
+    }
+}
+
 
 class PeminjamanController
 {
-    // ======================================
-    // DATA PEMINJAMAN
-    // ======================================
-
     public function index()
     {
-        $peminjamanModel = new Peminjaman();
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
 
-        $dataPeminjaman =
-            $peminjamanModel->getAll();
+        if (
+            $_SESSION['user']['role'] !== 'petugas' &&
+            $_SESSION['user']['role'] !== 'admin'
+        ) {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
 
+        $model = new Peminjaman();
 
-        require "../views/peminjaman.php";
+        $peminjaman = $model->getAll();
+
+        require_once __DIR__ . '/../views/peminjaman.php';
     }
 
+    public function pengajuan()
+    {
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
 
-    // ======================================
-    // PROSES AJUKAN PEMINJAMAN
-    // ======================================
+        $model = new Alat();
+
+        $alat = $model->getAll();
+
+        require_once __DIR__ . '/../views/pengajuan.php';
+    }
 
     public function prosesTambah()
     {
         if (!isset($_SESSION['user'])) {
-
-            header(
-                "Location: index.php?url=login"
-            );
-
+            header("Location: index.php?url=login");
             exit;
         }
 
+        $user_id = $_SESSION['user']['id'];
 
-        $user_id =
-            $_SESSION['user']['id'];
+        $alat_id = $_POST['alat_id'] ?? 0;
+        $jumlah = $_POST['jumlah'] ?? 0;
+        $tanggal_pinjam = $_POST['tanggal_pinjam'] ?? date('Y-m-d');
+        $tanggal_kembali = $_POST['tanggal_rencana_kembali'] ?? '';
 
+        $model = new Peminjaman();
 
-        $alat_id =
-            $_POST['alat_id'];
-
-
-        $jumlah =
-            $_POST['jumlah'];
-
-
-        $tanggal_pinjam =
-            $_POST['tanggal_pinjam'];
-
-
-        $tanggal_rencana_kembali =
-            $_POST['tanggal_rencana_kembali'];
-
-
-        $peminjamanModel =
-            new Peminjaman();
-
-
-        $hasil =
-            $peminjamanModel->tambah(
-                $user_id,
-                $alat_id,
-                $jumlah,
-                $tanggal_pinjam,
-                $tanggal_rencana_kembali
-            );
-
+        $hasil = $model->tambah(
+            $user_id,
+            $alat_id,
+            $jumlah,
+            $tanggal_pinjam,
+            $tanggal_kembali
+        );
 
         if ($hasil) {
-
             header(
                 "Location: index.php?url=riwayat&status=berhasil"
             );
-
-            exit;
-
         } else {
-
             header(
                 "Location: index.php?url=pengajuan&status=gagal"
             );
-
-            exit;
         }
+
+        exit;
     }
 
+    public function setujuiPeminjaman()
+    {
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
 
-    // ======================================
-    // HALAMAN PENGEMBALIAN
-    // ======================================
+        $id = $_GET['id'] ?? 0;
+
+        $model = new Peminjaman();
+
+        $model->setujuiPeminjaman(
+            $id,
+            $_SESSION['user']['id']
+        );
+
+        header(
+            "Location: index.php?url=peminjaman"
+        );
+
+        exit;
+    }
+
+    public function tolakPeminjaman()
+    {
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
+
+        $id = $_GET['id'] ?? 0;
+
+        $model = new Peminjaman();
+
+        $model->tolakPeminjaman(
+            $id,
+            $_SESSION['user']['id']
+        );
+
+        header(
+            "Location: index.php?url=peminjaman"
+        );
+
+        exit;
+    }
 
     public function pengembalian()
     {
         if (!isset($_SESSION['user'])) {
-
-            header(
-                "Location: index.php?url=login"
-            );
-
+            header("Location: index.php?url=login");
             exit;
         }
 
+        $model = new Peminjaman();
 
-        $user_id =
-            $_SESSION['user']['id'];
+        $peminjaman = $model->getAktifByUser(
+            $_SESSION['user']['id']
+        );
 
-
-        $peminjamanModel =
-            new Peminjaman();
-
-
-        $dataPeminjaman =
-            $peminjamanModel->getAktifByUser(
-                $user_id
-            );
-
-
-        require "../views/pengembalian.php";
+        require_once __DIR__ . '/../views/pengembalian.php';
     }
-
-
-    // ======================================
-    // PROSES PENGEMBALIAN
-    // ======================================
 
     public function prosesPengembalian()
     {
         if (!isset($_SESSION['user'])) {
-
-            header(
-                "Location: index.php?url=login"
-            );
-
+            header("Location: index.php?url=login");
             exit;
         }
 
+        $id = $_GET['id'] ?? $_POST['id'] ?? 0;
 
-        $id =
-            $_POST['id'];
+        $model = new Peminjaman();
 
-
-        $user_id =
-            $_SESSION['user']['id'];
-
-
-        $peminjamanModel =
-            new Peminjaman();
-
-
-        $hasil =
-            $peminjamanModel->kembalikan(
-                $id,
-                $user_id
-            );
-
+        $hasil = $model->kembalikan(
+            $id,
+            $_SESSION['user']['id']
+        );
 
         if ($hasil) {
-
             header(
                 "Location: index.php?url=pengembalian&status=berhasil"
             );
-
-            exit;
-
         } else {
-
             header(
                 "Location: index.php?url=pengembalian&status=gagal"
             );
+        }
 
+        exit;
+    }
+
+    public function pengembalianPetugas()
+    {
+        if (
+            !isset($_SESSION['user']) ||
+            $_SESSION['user']['role'] !== 'petugas'
+        ) {
+            header("Location: index.php?url=dashboard");
             exit;
         }
+
+        $model = new Peminjaman();
+
+        $peminjaman = $model->getMenungguPengembalian();
+
+        require_once __DIR__ . '/../views/pengembalian_petugas.php';
+    }
+
+    public function setujuiPengembalian()
+    {
+        if (
+            !isset($_SESSION['user']) ||
+            $_SESSION['user']['role'] !== 'petugas'
+        ) {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
+
+        $id = $_GET['id'] ?? 0;
+
+        $model = new Peminjaman();
+
+        $model->setujuiPengembalian(
+            $id,
+            $_SESSION['user']['id']
+        );
+
+        header(
+            "Location: index.php?url=pengembalian-petugas"
+        );
+
+        exit;
+    }
+
+    public function riwayat()
+    {
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
+
+        $model = new Peminjaman();
+
+        $riwayat = $model->getByUser(
+            $_SESSION['user']['id']
+        );
+
+        require_once __DIR__ . '/../views/riwayat.php';
+    }
+
+    public function denda()
+    {
+        if (
+            !isset($_SESSION['user']) ||
+            $_SESSION['user']['role'] !== 'petugas'
+        ) {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
+
+        $model = new Peminjaman();
+
+        $denda = $model->getDataDenda();
+
+        require_once __DIR__ . '/../views/denda.php';
     }
 }

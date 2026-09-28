@@ -1,140 +1,245 @@
+<?php
+
+$status = $_GET['status'] ?? '';
+
+?>
+
 <!DOCTYPE html>
-<html>
+<html lang="id">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Register - Peminjaman Alat Olahraga</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f2f4f7;
-        }
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-        .register-container {
-            width: 380px;
-            margin: 80px auto;
-            background: white;
-            padding: 35px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
+<title>Register - Peminjaman Alat Olahraga</title>
 
-        h2 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
+<style>
 
-        .subtitle {
-            text-align: center;
-            color: #777;
-            margin-bottom: 25px;
-        }
+* {
+    box-sizing: border-box;
+}
 
-        label {
-            display: block;
-            margin-bottom: 7px;
-            font-weight: bold;
-        }
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #f5f7fa;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 18px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
+.register-box {
+    width: 420px;
+    background: white;
+    border: 1px solid #e0e5ec;
+    border-radius: 12px;
+    padding: 35px;
+    box-shadow: 0 8px 25px rgba(0,0,0,.06);
+}
 
-        button {
-            width: 100%;
-            padding: 12px;  
-            background: #01060b;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-        }
+.logo {
+    width: 55px;
+    height: 55px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: #263b5a;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 27px;
+}
 
-        button:hover {
-            background: #3783e0;
-        }
+h1 {
+    text-align: center;
+    margin: 0;
+    color: #263b5a;
+    font-size: 23px;
+}
 
-        .login-link {
-            text-align: center;
-            margin-top: 20px;
-        }
+.subtitle {
+    text-align: center;
+    color: #778499;
+    font-size: 13px;
+    margin: 8px 0 25px;
+}
 
-        .login-link a {
-            color: #0b7dee;
-            font-weight: bold;
-            text-decoration: none;
-        }
-    </style>
+.form-group {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    color: #35445a;
+    margin-bottom: 7px;
+}
+
+input {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #d4dae3;
+    border-radius: 7px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #263b5a;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: 0;
+    border-radius: 7px;
+    background: #263b5a;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.login {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 13px;
+}
+
+.login a {
+    color: #263b5a;
+    font-weight: bold;
+}
+
+.alert {
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 18px;
+    font-size: 12px;
+}
+
+.danger {
+    background: #fae7e7;
+    color: #963e3e;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<div class="register-container">
+<div class="register-box">
 
-    <h2>Daftar Akun</h2>
+    <div class="logo">
+        ⚽
+    </div>
 
-    <p class="subtitle">
+    <h1>Daftar Akun</h1>
+
+    <div class="subtitle">
         Peminjaman Alat Olahraga
-    </p>
+    </div>
 
-    <form method="POST" action="../public/index.php?url=proses-register">
 
-        <label>Username</label>
-        <input 
-            type="text" 
-            name="username" 
-            placeholder="Masukkan username"
-            required
-        >
+    <?php if ($status === 'gagal'): ?>
 
-        <label>Nama lengkap</label>
-        <input 
-            type="text" 
-            name="nama_lengkap" 
-            placeholder="Masukan nama lengkap"
-            required
-        >
+        <div class="alert danger">
+            Registrasi gagal. Username mungkin sudah digunakan.
+        </div>
 
-        <label>Password</label>
-        <input 
-            type="password" 
-            name="password" 
-            placeholder="Masukkan password"
-            required
-        >
+    <?php elseif ($status === 'password'): ?>
 
-        <label>Konfirmasi Password</label>
-        <input 
-            type="password" 
-            name="konfirmasi_password"
-            placeholder="konfirmasi password"
-            required
-        >
+        <div class="alert danger">
+            Konfirmasi password tidak sama.
+        </div>
+
+    <?php endif; ?>
+
+
+    <form
+        method="POST"
+        action="index.php?url=proses-register"
+    >
+
+        <div class="form-group">
+
+            <label>Nama Lengkap</label>
+
+            <input
+                type="text"
+                name="nama_lengkap"
+                placeholder="Masukkan nama lengkap"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Username</label>
+
+            <input
+                type="text"
+                name="username"
+                placeholder="Masukkan username"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Password</label>
+
+            <input
+                type="password"
+                name="password"
+                placeholder="Masukkan password"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Konfirmasi Password</label>
+
+            <input
+                type="password"
+                name="konfirmasi_password"
+                placeholder="Ulangi password"
+                required
+            >
+
+        </div>
+
 
         <button type="submit">
-            DAFTAR
+            Daftar
         </button>
 
     </form>
 
-    <div class="login-link">
+
+    <div class="login">
+
         Sudah punya akun?
-        <a href="../public/index.php">
+
+        <a href="index.php?url=login">
             Login
         </a>
+
     </div>
 
 </div>
 
 </body>
+
 </html>

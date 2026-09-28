@@ -1,336 +1,144 @@
 <?php
 
-if (!isset($_SESSION['user'])) {
-    header("Location: /PEMINJAMAN_ALAT/public/index.php?url=login");
-    exit;
-}
+$active = 'riwayat';
+$pageTitle = 'Riwayat Peminjaman';
 
-$user = $_SESSION['user'];
+require_once __DIR__ . '/header.php';
 
-$nama = $user['nama_lengkap'];
+$status = $_GET['status'] ?? '';
 
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
+<?php if ($status === 'berhasil'): ?>
 
-<head>
+<div class="alert alert-success">
+    Pengajuan peminjaman berhasil dikirim.
+</div>
 
-    <meta charset="UTF-8">
+<?php endif; ?>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Riwayat Peminjaman</title>
+<div class="page-card">
 
-    <style>
+    <h1>Riwayat Peminjaman</h1>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            background: #F5F7FA;
-        }
-
-        .navbar {
-            height: 70px;
-            background: #263B5A;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-        }
-
-        .logout {
-            background: white;
-            color: #263B5A;
-            padding: 10px 18px;
-            border-radius: 7px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .container {
-            display: flex;
-            min-height: calc(100vh - 70px);
-        }
-
-        .sidebar {
-            width: 240px;
-            background: #314A6E;
-            padding: 25px 15px;
-        }
-
-        .sidebar-title {
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-            font-weight: bold;
-        }
-
-        .menu {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 13px 15px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-        }
-
-        .menu:hover,
-        .menu.active {
-            background: #263B5A;
-        }
-
-        .content {
-            flex: 1;
-            padding: 40px;
-        }
-
-        .content h1 {
-            color: #263B5A;
-            margin-bottom: 10px;
-        }
-
-        .content > p {
-            color: #666;
-            margin-bottom: 25px;
-        }
-
-        .table-box {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            border: 1px solid #E1E6ED;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: #263B5A;
-            color: white;
-            padding: 13px;
-            text-align: left;
-        }
-
-        td {
-            padding: 13px;
-            border-bottom: 1px solid #E1E6ED;
-        }
-
-        .status {
-            font-weight: bold;
-        }
-
-        .empty {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            color: #666;
-        }
-
-        @media (max-width: 700px) {
-
-            .container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-            }
-
-            .content {
-                padding: 25px 15px;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<div class="navbar">
-
-    <h2>
-        Peminjaman Alat Olahraga
-    </h2>
-
-    <a
-        href="/PEMINJAMAN_ALAT/public/index.php?url=logout"
-        class="logout"
-    >
-        Logout
-    </a>
+    <p>
+        Riwayat pengajuan peminjaman alat olahraga Anda.
+    </p>
 
 </div>
 
 
-<div class="container">
+<div class="table-card">
 
-    <div class="sidebar">
+<table>
 
-        <div class="sidebar-title">
-            MENU
-        </div>
+<thead>
 
+<tr>
+    <th>No</th>
+    <th>Alat</th>
+    <th>Jumlah</th>
+    <th>Tanggal Pinjam</th>
+    <th>Rencana Kembali</th>
+    <th>Status</th>
+</tr>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=dashboard"
-            class="menu"
-        >
-            Dashboard
-        </a>
+</thead>
 
+<tbody>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=alat"
-            class="menu"
-        >
-            Daftar Alat
-        </a>
+<?php if (!empty($riwayat)): ?>
 
+<?php $no = 1; ?>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=pengajuan"
-            class="menu"
-        >
-            Ajukan Peminjaman
-        </a>
+<?php foreach ($riwayat as $row): ?>
 
+<tr>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=pengembalian"
-            class="menu"
-        >
-            Pengembalian
-        </a>
+    <td><?= $no++ ?></td>
 
+    <td>
+        <?= htmlspecialchars(
+            $row['nama_alat'] ?? '-'
+        ) ?>
+    </td>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=riwayat"
-            class="menu active"
-        >
-            Riwayat Peminjaman
-        </a>
+    <td>
+        <?= htmlspecialchars($row['jumlah']) ?>
+    </td>
 
+    <td>
+        <?= htmlspecialchars($row['tanggal_pinjam']) ?>
+    </td>
 
-        <a
-            href="/PEMINJAMAN_ALAT/public/index.php?url=logout"
-            class="menu"
-        >
-            Logout
-        </a>
+    <td>
+        <?= htmlspecialchars($row['tanggal_rencana_kembali']) ?>
+    </td>
 
-    </div>
+    <td>
 
+        <?php if ($row['status'] === 'diajukan'): ?>
 
-    <div class="content">
+            <span class="badge badge-warning">
+                Menunggu Persetujuan
+            </span>
 
-        <h1>
-            Riwayat Peminjaman
-        </h1>
+        <?php elseif ($row['status'] === 'disetujui'): ?>
 
-        <p>
-            Daftar riwayat peminjaman alat olahraga.
-        </p>
+            <span class="badge badge-success">
+                Disetujui
+            </span>
 
+        <?php elseif ($row['status'] === 'menunggu_pengembalian'): ?>
 
-        <?php if (empty($dataPeminjaman)): ?>
+            <span class="badge badge-warning">
+                Menunggu Pengembalian
+            </span>
 
-            <div class="empty">
-                Belum ada riwayat peminjaman.
-            </div>
+        <?php elseif ($row['status'] === 'dikembalikan'): ?>
+
+            <span class="badge badge-success">
+                Dikembalikan
+            </span>
+
+        <?php elseif ($row['status'] === 'ditolak'): ?>
+
+            <span class="badge badge-danger">
+                Ditolak
+            </span>
 
         <?php else: ?>
 
-            <div class="table-box">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>No</th>
-                            <th>Nama Alat</th>
-                            <th>Jumlah</th>
-                            <th>Tanggal Pinjam</th>
-                            <th>Rencana Kembali</th>
-                            <th>Status</th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        <?php $no = 1; ?>
-
-                        <?php foreach ($dataPeminjaman as $data): ?>
-
-                            <tr>
-
-                                <td>
-                                    <?= $no++; ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $data['nama_alat']
-                                    ); ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $data['jumlah']
-                                    ); ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $data['tanggal_pinjam']
-                                    ); ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $data['tanggal_rencana_kembali']
-                                    ); ?>
-                                </td>
-
-                                <td class="status">
-                                    <?= htmlspecialchars(
-                                        ucfirst($data['status'])
-                                    ); ?>
-                                </td>
-
-                            </tr>
-
-                        <?php endforeach; ?>
-
-                    </tbody>
-
-                </table>
-
-            </div>
+            <span class="badge">
+                <?= htmlspecialchars($row['status']) ?>
+            </span>
 
         <?php endif; ?>
 
-    </div>
+    </td>
+
+</tr>
+
+<?php endforeach; ?>
+
+<?php else: ?>
+
+<tr>
+
+<td colspan="6" class="empty">
+    Belum ada riwayat peminjaman.
+</td>
+
+</tr>
+
+<?php endif; ?>
+
+</tbody>
+
+</table>
 
 </div>
 
-</body>
 
-</html>
+<?php require_once __DIR__ . '/footer.php'; ?>

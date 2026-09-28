@@ -2,409 +2,140 @@
 
 session_start();
 
-require_once "../config/database.php";
+require_once __DIR__ . '/../config/database.php';
 
-require_once "../models/user.php";
-require_once "../models/alat.php";
-require_once "../models/kategori.php";
-require_once "../models/peminjaman.php";
+require_once __DIR__ . '/../models/user.php';
+require_once __DIR__ . '/../models/alat.php';
+require_once __DIR__ . '/../models/kategori.php';
+require_once __DIR__ . '/../models/peminjaman.php';
 
-require_once "../controllers/controller.php";
+require_once __DIR__ . '/../controllers/controller.php';
 
 
 $url = $_GET['url'] ?? 'login';
 
 
-// ==================================================
-// ROUTING
-// ==================================================
-
 switch ($url) {
 
-
-    // ==================================================
-    // LOGIN
-    // ==================================================
-
     case 'login':
-
-        $controller = new AuthController();
-
-        $controller->login();
-
+        (new AuthController())->login();
         break;
-
-
-    // ==================================================
-    // PROSES LOGIN
-    // ==================================================
 
     case 'proses-login':
-
-        $controller = new AuthController();
-
-        $controller->prosesLogin();
-
+        (new AuthController())->prosesLogin();
         break;
-
-
-    // ==================================================
-    // REGISTER
-    // ==================================================
 
     case 'register':
-
-        $controller = new AuthController();
-
-        $controller->register();
-
+        (new AuthController())->register();
         break;
-
-
-    // ==================================================
-    // PROSES REGISTER
-    // ==================================================
 
     case 'proses-register':
-
-        $controller = new AuthController();
-
-        $controller->prosesRegister();
-
+        (new AuthController())->prosesRegister();
         break;
 
-
-    // ==================================================
-    // DASHBOARD
-    // ==================================================
 
     case 'dashboard':
 
         if (!isset($_SESSION['user'])) {
-
             header("Location: index.php?url=login");
-
             exit;
         }
 
-
-        $alatModel = new Alat();
-
-        $dataAlat = $alatModel->getAll();
-
-        $totalAlat = count($dataAlat);
-
-
-        require "../views/dashboard.php";
+        require_once __DIR__ . '/../views/dashboard.php';
 
         break;
 
-
-    // ==================================================
-    // DATA ALAT
-    // ==================================================
 
     case 'alat':
-
-        if (!isset($_SESSION['user'])) {
-
-            header("Location: index.php?url=login");
-
-            exit;
-        }
-
-
-        $controller = new AlatController();
-
-        $controller->index();
-
+        (new AlatController())->index();
         break;
-
-
-    // ==================================================
-    // TAMBAH ALAT
-    // ==================================================
 
     case 'tambah-alat':
-
-        if (
-            !isset($_SESSION['user']) ||
-            $_SESSION['user']['role'] !== 'admin'
-        ) {
-
-            header("Location: index.php?url=dashboard");
-
-            exit;
-        }
-
-
-        $controller = new AlatController();
-
-        $controller->tambah();
-
+        (new AlatController())->tambah();
         break;
-
-
-    // ==================================================
-    // PROSES TAMBAH ALAT
-    // ==================================================
 
     case 'proses-tambah-alat':
-
-        if (
-            !isset($_SESSION['user']) ||
-            $_SESSION['user']['role'] !== 'admin'
-        ) {
-
-            header("Location: index.php?url=dashboard");
-
-            exit;
-        }
-
-
-        $controller = new AlatController();
-
-        $controller->prosesTambah();
-
+        (new AlatController())->prosesTambah();
         break;
-
-
-    // ==================================================
-    // EDIT ALAT
-    // ==================================================
 
     case 'edit-alat':
-
-        if (
-            !isset($_SESSION['user']) ||
-            $_SESSION['user']['role'] !== 'admin'
-        ) {
-
-            header("Location: index.php?url=dashboard");
-
-            exit;
-        }
-
-
-        $controller = new AlatController();
-
-        $controller->edit();
-
+        (new AlatController())->edit();
         break;
-
-
-    // ==================================================
-    // PROSES EDIT ALAT
-    // ==================================================
 
     case 'proses-edit-alat':
-
-        if (
-            !isset($_SESSION['user']) ||
-            $_SESSION['user']['role'] !== 'admin'
-        ) {
-
-            header("Location: index.php?url=dashboard");
-
-            exit;
-        }
-
-
-        $controller = new AlatController();
-
-        $controller->prosesEdit();
-
+        (new AlatController())->prosesEdit();
         break;
-
-
-    // ==================================================
-    // HAPUS ALAT
-    // ==================================================
 
     case 'hapus-alat':
-
-        if (
-            !isset($_SESSION['user']) ||
-            $_SESSION['user']['role'] !== 'admin'
-        ) {
-
-            header("Location: index.php?url=dashboard");
-
-            exit;
-        }
-
-
-        $controller = new AlatController();
-
-        $controller->hapus();
-
+        (new AlatController())->hapus();
         break;
 
 
-    // ==================================================
-    // FORM PENGAJUAN PEMINJAMAN
-    // ==================================================
-
-    case 'pengajuan':
-
-        if (!isset($_SESSION['user'])) {
-
-            header("Location: index.php?url=login");
-
-            exit;
-        }
-
-
-        $alatModel = new Alat();
-
-        $dataAlat = $alatModel->getAll();
-
-
-        require "../views/pengajuan.php";
-
+    case 'peminjam':
+        UserController::peminjam();
         break;
 
-
-    // ==================================================
-    // PROSES PENGAJUAN PEMINJAMAN
-    // ==================================================
-
-    case 'proses-pengajuan':
-
-        if (!isset($_SESSION['user'])) {
-
-            header("Location: index.php?url=login");
-
-            exit;
-        }
-
-
-        $controller = new PeminjamanController();
-
-        $controller->prosesTambah();
-
-        break;
-
-
-    // ==================================================
-    // DATA PEMINJAMAN
-    // ADMIN / PETUGAS
-    // ==================================================
 
     case 'peminjaman':
-
-        if (!isset($_SESSION['user'])) {
-
-            header("Location: index.php?url=login");
-
-            exit;
-        }
-
-
-        $controller = new PeminjamanController();
-
-        $controller->index();
-
+        (new PeminjamanController())->index();
         break;
 
+    case 'pengajuan':
+        (new PeminjamanController())->pengajuan();
+        break;
 
-    // ==================================================
-    // PENGEMBALIAN
-    // ==================================================
+    case 'proses-pengajuan':
+        (new PeminjamanController())->prosesTambah();
+        break;
+
+    case 'setujui-peminjaman':
+        (new PeminjamanController())->setujuiPeminjaman();
+        break;
+
+    case 'tolak-peminjaman':
+        (new PeminjamanController())->tolakPeminjaman();
+        break;
+
 
     case 'pengembalian':
-
-        if (!isset($_SESSION['user'])) {
-
-            header("Location: index.php?url=login");
-
-            exit;
-        }
-
-
-        $controller = new PeminjamanController();
-
-        $controller->pengembalian();
-
+        (new PeminjamanController())->pengembalian();
         break;
-
-
-    // ==================================================
-    // PROSES PENGEMBALIAN
-    // ==================================================
 
     case 'proses-pengembalian':
-
-        if (!isset($_SESSION['user'])) {
-
-            header("Location: index.php?url=login");
-
-            exit;
-        }
-
-
-        $controller = new PeminjamanController();
-
-        $controller->prosesPengembalian();
-
+        (new PeminjamanController())->prosesPengembalian();
         break;
 
+    case 'pengembalian-petugas':
+        (new PeminjamanController())->pengembalianPetugas();
+        break;
 
-    // ==================================================
-    // RIWAYAT PEMINJAMAN
-    // ==================================================
+    case 'setujui-pengembalian':
+        (new PeminjamanController())->setujuiPengembalian();
+        break;
+
 
     case 'riwayat':
-
-        if (!isset($_SESSION['user'])) {
-
-            header("Location: index.php?url=login");
-
-            exit;
-        }
-
-
-        $peminjamanModel = new Peminjaman();
-
-
-        $user_id = $_SESSION['user']['id'];
-
-
-        $dataPeminjaman =
-            $peminjamanModel->getByUser($user_id);
-
-
-        require "../views/riwayat.php";
-
+        (new PeminjamanController())->riwayat();
         break;
 
+    case 'denda':
+        (new PeminjamanController())->denda();
+        break;
 
-    // ==================================================
-    // LOGOUT
-    // ==================================================
 
     case 'logout':
 
         session_unset();
-
         session_destroy();
 
-
         header("Location: index.php?url=login");
-
         exit;
 
         break;
 
 
-    // ==================================================
-    // DEFAULT
-    // ==================================================
-
     default:
 
         header("Location: index.php?url=login");
-
         exit;
-
 }
