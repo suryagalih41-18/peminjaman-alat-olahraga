@@ -9,6 +9,7 @@ class Peminjaman
         $this->db = (new Database())->connect();
     }
 
+
     public function getAll()
     {
         $sql = "
@@ -24,10 +25,12 @@ class Peminjaman
         ";
 
         $query = $this->db->prepare($sql);
+
         $query->execute();
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function getByUser($user_id)
     {
@@ -42,10 +45,14 @@ class Peminjaman
         ";
 
         $query = $this->db->prepare($sql);
-        $query->execute([$user_id]);
+
+        $query->execute([
+            $user_id
+        ]);
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function tambah(
         $user_id,
@@ -58,6 +65,7 @@ class Peminjaman
 
             $this->db->beginTransaction();
 
+
             $query = $this->db->prepare(
                 "SELECT stok
                  FROM alat
@@ -65,20 +73,32 @@ class Peminjaman
                  FOR UPDATE"
             );
 
-            $query->execute([$alat_id]);
+            $query->execute([
+                $alat_id
+            ]);
 
             $alat = $query->fetch(PDO::FETCH_ASSOC);
 
+
             if (!$alat) {
+
                 $this->db->rollBack();
+
                 return false;
             }
+
 
             if ($alat['stok'] < $jumlah) {
+
                 $this->db->rollBack();
+
                 return false;
             }
 
+
+            /*
+             * Kurangi stok ketika pengajuan dibuat.
+             */
             $query = $this->db->prepare(
                 "UPDATE alat
                  SET stok = stok - ?
@@ -90,6 +110,11 @@ class Peminjaman
                 $alat_id
             ]);
 
+
+            /*
+             * Masukkan peminjaman
+             * dengan status diajukan.
+             */
             $query = $this->db->prepare(
                 "INSERT INTO peminjaman
                 (
@@ -111,6 +136,7 @@ class Peminjaman
                 $tanggal_rencana_kembali
             ]);
 
+
             $this->db->commit();
 
             return true;
@@ -125,8 +151,11 @@ class Peminjaman
         }
     }
 
-    public function setujuiPeminjaman($id, $petugas_id)
-    {
+
+    public function setujuiPeminjaman(
+        $id,
+        $petugas_id
+    ) {
         $query = $this->db->prepare(
             "UPDATE peminjaman
              SET status = 'disetujui',
@@ -141,11 +170,15 @@ class Peminjaman
         ]);
     }
 
-    public function tolakPeminjaman($id, $petugas_id)
-    {
+
+    public function tolakPeminjaman(
+        $id,
+        $petugas_id
+    ) {
         try {
 
             $this->db->beginTransaction();
+
 
             $query = $this->db->prepare(
                 "SELECT *
@@ -155,15 +188,26 @@ class Peminjaman
                  FOR UPDATE"
             );
 
-            $query->execute([$id]);
+            $query->execute([
+                $id
+            ]);
 
-            $peminjaman = $query->fetch(PDO::FETCH_ASSOC);
+            $peminjaman =
+                $query->fetch(PDO::FETCH_ASSOC);
+
 
             if (!$peminjaman) {
+
                 $this->db->rollBack();
+
                 return false;
             }
 
+
+            /*
+             * Jika ditolak,
+             * stok dikembalikan.
+             */
             $query = $this->db->prepare(
                 "UPDATE alat
                  SET stok = stok + ?
@@ -174,6 +218,7 @@ class Peminjaman
                 $peminjaman['jumlah'],
                 $peminjaman['alat_id']
             ]);
+
 
             $query = $this->db->prepare(
                 "UPDATE peminjaman
@@ -186,6 +231,7 @@ class Peminjaman
                 $petugas_id,
                 $id
             ]);
+
 
             $this->db->commit();
 
@@ -201,30 +247,14 @@ class Peminjaman
         }
     }
 
-    public function getAktifByUser($user_id)
-    {
-        $sql = "
-            SELECT
-                p.*,
-                a.nama_alat
-            FROM peminjaman p
-            LEFT JOIN alat a ON p.alat_id = a.id
-            WHERE p.user_id = ?
-            AND p.status IN (
-                'disetujui',
-                'menunggu_pengembalian'
-            )
-            ORDER BY p.id DESC
-        ";
 
-        $query = $this->db->prepare($sql);
-        $query->execute([$user_id]);
-
-        return $query->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function kembalikan($id, $user_id)
-    {
+    /*
+     * MENGAJUKAN PENGEMBALIAN
+     */
+    public function kembalikan(
+        $id,
+        $user_id
+    ) {
         $query = $this->db->prepare(
             "UPDATE peminjaman
              SET status = 'menunggu_pengembalian'
@@ -239,6 +269,7 @@ class Peminjaman
         ]);
     }
 
+
     public function ajukanPengembalian($id)
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -249,12 +280,18 @@ class Peminjaman
             return false;
         }
 
+        $user_id = $_SESSION['user']['id'];
+
         return $this->kembalikan(
             $id,
-            $_SESSION['user']['id']
+            $user_id
         );
     }
 
+
+    /*
+     * DATA YANG MENUNGGU DITERIMA PETUGAS
+     */
     public function getMenungguPengembalian()
     {
         $sql = "
@@ -264,23 +301,33 @@ class Peminjaman
                 u.username,
                 a.nama_alat
             FROM peminjaman p
-            LEFT JOIN users u ON p.user_id = u.id
-            LEFT JOIN alat a ON p.alat_id = a.id
+            LEFT JOIN users u
+                ON p.user_id = u.id
+            LEFT JOIN alat a
+                ON p.alat_id = a.id
             WHERE p.status = 'menunggu_pengembalian'
             ORDER BY p.id DESC
         ";
 
         $query = $this->db->prepare($sql);
+
         $query->execute();
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function setujuiPengembalian($id, $petugas_id)
-    {
+
+    /*
+     * PETUGAS MENERIMA PENGEMBALIAN
+     */
+    public function setujuiPengembalian(
+        $id,
+        $petugas_id
+    ) {
         try {
 
             $this->db->beginTransaction();
+
 
             $query = $this->db->prepare(
                 "SELECT *
@@ -290,15 +337,25 @@ class Peminjaman
                  FOR UPDATE"
             );
 
-            $query->execute([$id]);
+            $query->execute([
+                $id
+            ]);
 
-            $peminjaman = $query->fetch(PDO::FETCH_ASSOC);
+            $peminjaman =
+                $query->fetch(PDO::FETCH_ASSOC);
+
 
             if (!$peminjaman) {
+
                 $this->db->rollBack();
+
                 return false;
             }
 
+
+            /*
+             * Kembalikan stok alat.
+             */
             $query = $this->db->prepare(
                 "UPDATE alat
                  SET stok = stok + ?
@@ -310,6 +367,10 @@ class Peminjaman
                 $peminjaman['alat_id']
             ]);
 
+
+            /*
+             * Ubah status menjadi dikembalikan.
+             */
             $query = $this->db->prepare(
                 "UPDATE peminjaman
                  SET status = 'dikembalikan',
@@ -321,6 +382,7 @@ class Peminjaman
                 $petugas_id,
                 $id
             ]);
+
 
             $this->db->commit();
 
@@ -336,6 +398,40 @@ class Peminjaman
         }
     }
 
+
+    /*
+     * DATA AKTIF
+     */
+    public function getAktifByUser($user_id)
+    {
+        $sql = "
+            SELECT
+                p.*,
+                a.nama_alat
+            FROM peminjaman p
+            LEFT JOIN alat a
+                ON p.alat_id = a.id
+            WHERE p.user_id = ?
+            AND p.status IN (
+                'disetujui',
+                'menunggu_pengembalian'
+            )
+            ORDER BY p.id DESC
+        ";
+
+        $query = $this->db->prepare($sql);
+
+        $query->execute([
+            $user_id
+        ]);
+
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /*
+     * DATA DENDA
+     */
     public function getDataDenda()
     {
         $data = $this->getAll();
@@ -344,32 +440,55 @@ class Peminjaman
 
         $hariIni = new DateTime();
 
+
         foreach ($data as $row) {
 
-            if (empty($row['tanggal_rencana_kembali'])) {
+            if (
+                empty(
+                    $row['tanggal_rencana_kembali']
+                )
+            ) {
                 continue;
             }
 
-            if ($row['status'] === 'dikembalikan') {
+
+            if (
+                $row['status'] === 'dikembalikan'
+            ) {
                 continue;
             }
 
-            $tanggalKembali = new DateTime(
-                $row['tanggal_rencana_kembali']
-            );
+
+            $tanggalKembali =
+                new DateTime(
+                    $row['tanggal_rencana_kembali']
+                );
+
 
             if ($hariIni > $tanggalKembali) {
 
-                $selisih = $tanggalKembali->diff($hariIni);
+                $selisih =
+                    $tanggalKembali->diff(
+                        $hariIni
+                    );
 
-                $hariTerlambat = $selisih->days;
+                $hariTerlambat =
+                    $selisih->days;
 
-                $row['hari_terlambat'] = $hariTerlambat;
-                $row['denda'] = $hariTerlambat * 5000;
+                $denda =
+                    $hariTerlambat * 5000;
+
+
+                $row['hari_terlambat'] =
+                    $hariTerlambat;
+
+                $row['denda'] =
+                    $denda;
 
                 $hasil[] = $row;
             }
         }
+
 
         return $hasil;
     }

@@ -1,8 +1,13 @@
+```php
 <?php
+
+/* =========================================================
+   AUTH CONTROLLER
+========================================================= */
 
 class AuthController
 {
-    public function login()
+    public static function login()
     {
         if (isset($_SESSION['user'])) {
             header("Location: index.php?url=dashboard");
@@ -12,17 +17,14 @@ class AuthController
         require_once __DIR__ . '/../views/login.php';
     }
 
-    public function prosesLogin()
+    public static function prosesLogin()
     {
         $username = $_POST['username'] ?? '';
         $password = $_POST['password'] ?? '';
 
         $model = new User();
 
-        $user = $model->login(
-            $username,
-            $password
-        );
+        $user = $model->login($username, $password);
 
         if ($user) {
 
@@ -32,81 +34,58 @@ class AuthController
             exit;
         }
 
-        header(
-            "Location: index.php?url=login&status=gagal"
-        );
-
+        header("Location: index.php?url=login&status=gagal");
         exit;
     }
 
-    public function register()
+    public static function register()
     {
-        require_once __DIR__ . '/../views/register.php';
-    }
-
-    public function prosesRegister()
-    {
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
-        $konfirmasi = $_POST['konfirmasi_password'] ?? '';
-        $nama = $_POST['nama_lengkap'] ?? '';
-
-        if (
-            empty($username) ||
-            empty($password) ||
-            empty($nama)
-        ) {
-            header(
-                "Location: index.php?url=register&status=gagal"
-            );
+        if (isset($_SESSION['user'])) {
+            header("Location: index.php?url=dashboard");
             exit;
         }
 
+        require_once __DIR__ . '/../views/register.php';
+    }
+
+    public static function prosesRegister()
+    {
+        $nama_lengkap = $_POST['nama_lengkap'] ?? '';
+        $username = $_POST['username'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $konfirmasi = $_POST['konfirmasi_password'] ?? '';
+
         if ($password !== $konfirmasi) {
-            header(
-                "Location: index.php?url=register&status=password"
-            );
+            header("Location: index.php?url=register&status=password");
             exit;
         }
 
         $model = new User();
 
-        if (
-            $model->register(
-                $username,
-                $password,
-                $nama
-            )
-        ) {
-            header(
-                "Location: index.php?url=login&status=register"
-            );
+        $hasil = $model->register(
+            $username,
+            $password,
+            $nama_lengkap
+        );
+
+        if ($hasil) {
+            header("Location: index.php?url=login&status=register");
             exit;
         }
 
-        header(
-            "Location: index.php?url=register&status=gagal"
-        );
-
+        header("Location: index.php?url=register&status=gagal");
         exit;
     }
 }
 
 
+/* =========================================================
+   ALAT CONTROLLER
+========================================================= */
+
 class AlatController
 {
-    private function cekAdmin()
-    {
-        if (
-            !isset($_SESSION['user']) ||
-            $_SESSION['user']['role'] !== 'admin'
-        ) {
-            header("Location: index.php?url=dashboard");
-            exit;
-        }
-    }
-
-    public function index()
+    public static function index()
     {
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?url=login");
@@ -120,9 +99,17 @@ class AlatController
         require_once __DIR__ . '/../views/alat.php';
     }
 
-    public function tambah()
+    public static function tambah()
     {
-        $this->cekAdmin();
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'admin') {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
 
         $kategoriModel = new Kategori();
 
@@ -131,34 +118,47 @@ class AlatController
         require_once __DIR__ . '/../views/alat_tambah.php';
     }
 
-    public function prosesTambah()
+    public static function prosesTambah()
     {
-        $this->cekAdmin();
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
 
-        $nama = $_POST['nama_alat'] ?? '';
-        $kategori = $_POST['kategori_id'] ?? '';
+        if ($_SESSION['user']['role'] !== 'admin') {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
+
+        $nama_alat = $_POST['nama_alat'] ?? '';
+        $kategori_id = $_POST['kategori_id'] ?? '';
         $stok = $_POST['stok'] ?? 0;
         $kondisi = $_POST['kondisi'] ?? '';
 
         $model = new Alat();
 
         $model->tambah(
-            $nama,
-            $kategori,
+            $nama_alat,
+            $kategori_id,
             $stok,
             $kondisi
         );
 
-        header(
-            "Location: index.php?url=alat&status=berhasil"
-        );
-
+        header("Location: index.php?url=alat&status=berhasil");
         exit;
     }
 
-    public function edit()
+    public static function edit()
     {
-        $this->cekAdmin();
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'admin') {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
 
         $id = $_GET['id'] ?? 0;
 
@@ -173,13 +173,21 @@ class AlatController
         require_once __DIR__ . '/../views/alat_edit.php';
     }
 
-    public function prosesEdit()
+    public static function prosesEdit()
     {
-        $this->cekAdmin();
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'admin') {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
 
         $id = $_POST['id'] ?? 0;
-        $nama = $_POST['nama_alat'] ?? '';
-        $kategori = $_POST['kategori_id'] ?? '';
+        $nama_alat = $_POST['nama_alat'] ?? '';
+        $kategori_id = $_POST['kategori_id'] ?? '';
         $stok = $_POST['stok'] ?? 0;
         $kondisi = $_POST['kondisi'] ?? '';
 
@@ -187,22 +195,27 @@ class AlatController
 
         $model->edit(
             $id,
-            $nama,
-            $kategori,
+            $nama_alat,
+            $kategori_id,
             $stok,
             $kondisi
         );
 
-        header(
-            "Location: index.php?url=alat&status=berhasil"
-        );
-
+        header("Location: index.php?url=alat&status=berhasil");
         exit;
     }
 
-    public function hapus()
+    public static function hapus()
     {
-        $this->cekAdmin();
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'admin') {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
 
         $id = $_GET['id'] ?? 0;
 
@@ -210,23 +223,26 @@ class AlatController
 
         $model->hapus($id);
 
-        header(
-            "Location: index.php?url=alat&status=berhasil"
-        );
-
+        header("Location: index.php?url=alat&status=berhasil");
         exit;
     }
 }
 
 
+/* =========================================================
+   USER CONTROLLER
+========================================================= */
+
 class UserController
 {
     public static function peminjam()
     {
-        if (
-            !isset($_SESSION['user']) ||
-            $_SESSION['user']['role'] !== 'admin'
-        ) {
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'admin') {
             header("Location: index.php?url=dashboard");
             exit;
         }
@@ -240,19 +256,22 @@ class UserController
 }
 
 
+/* =========================================================
+   PEMINJAMAN CONTROLLER
+========================================================= */
+
 class PeminjamanController
 {
-    public function index()
+    public static function index()
     {
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?url=login");
             exit;
         }
 
-        if (
-            $_SESSION['user']['role'] !== 'petugas' &&
-            $_SESSION['user']['role'] !== 'admin'
-        ) {
+        $role = $_SESSION['user']['role'];
+
+        if ($role !== 'admin' && $role !== 'petugas') {
             header("Location: index.php?url=dashboard");
             exit;
         }
@@ -264,10 +283,16 @@ class PeminjamanController
         require_once __DIR__ . '/../views/peminjaman.php';
     }
 
-    public function pengajuan()
+
+    public static function pengajuan()
     {
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'peminjam') {
+            header("Location: index.php?url=dashboard");
             exit;
         }
 
@@ -278,7 +303,8 @@ class PeminjamanController
         require_once __DIR__ . '/../views/pengajuan.php';
     }
 
-    public function prosesTambah()
+
+    public static function prosesTambah()
     {
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?url=login");
@@ -289,8 +315,9 @@ class PeminjamanController
 
         $alat_id = $_POST['alat_id'] ?? 0;
         $jumlah = $_POST['jumlah'] ?? 0;
-        $tanggal_pinjam = $_POST['tanggal_pinjam'] ?? date('Y-m-d');
-        $tanggal_kembali = $_POST['tanggal_rencana_kembali'] ?? '';
+        $tanggal_pinjam = $_POST['tanggal_pinjam'] ?? '';
+        $tanggal_rencana_kembali =
+            $_POST['tanggal_rencana_kembali'] ?? '';
 
         $model = new Peminjaman();
 
@@ -299,14 +326,17 @@ class PeminjamanController
             $alat_id,
             $jumlah,
             $tanggal_pinjam,
-            $tanggal_kembali
+            $tanggal_rencana_kembali
         );
 
         if ($hasil) {
+
             header(
                 "Location: index.php?url=riwayat&status=berhasil"
             );
+
         } else {
+
             header(
                 "Location: index.php?url=pengajuan&status=gagal"
             );
@@ -315,10 +345,16 @@ class PeminjamanController
         exit;
     }
 
-    public function setujuiPeminjaman()
+
+    public static function setujuiPeminjaman()
     {
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'petugas') {
+            header("Location: index.php?url=dashboard");
             exit;
         }
 
@@ -331,17 +367,20 @@ class PeminjamanController
             $_SESSION['user']['id']
         );
 
-        header(
-            "Location: index.php?url=peminjaman"
-        );
-
+        header("Location: index.php?url=peminjaman");
         exit;
     }
 
-    public function tolakPeminjaman()
+
+    public static function tolakPeminjaman()
     {
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'petugas') {
+            header("Location: index.php?url=dashboard");
             exit;
         }
 
@@ -354,37 +393,68 @@ class PeminjamanController
             $_SESSION['user']['id']
         );
 
-        header(
-            "Location: index.php?url=peminjaman"
-        );
-
+        header("Location: index.php?url=peminjaman");
         exit;
     }
 
-    public function pengembalian()
+
+    /*
+     * MENU PENGEMBALIAN PEMINJAM
+     */
+    public static function pengembalian()
     {
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?url=login");
             exit;
         }
 
+        if ($_SESSION['user']['role'] !== 'peminjam') {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
+
         $model = new Peminjaman();
 
-        $peminjaman = $model->getAktifByUser(
+        /*
+         * PENTING:
+         * Ambil semua peminjaman milik user.
+         * Jadi status disetujui akan muncul
+         * dan tombol pengembalian bisa digunakan.
+         */
+        $peminjaman = $model->getByUser(
             $_SESSION['user']['id']
         );
 
         require_once __DIR__ . '/../views/pengembalian.php';
     }
 
-    public function prosesPengembalian()
+
+    /*
+     * PROSES AJUKAN PENGEMBALIAN
+     */
+    public static function prosesPengembalian()
     {
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?url=login");
             exit;
         }
 
+        if ($_SESSION['user']['role'] !== 'peminjam') {
+            header("Location: index.php?url=dashboard");
+            exit;
+        }
+
+        /*
+         * ID bisa berasal dari GET maupun POST.
+         */
         $id = $_GET['id'] ?? $_POST['id'] ?? 0;
+
+        if (!$id) {
+            header(
+                "Location: index.php?url=pengembalian&status=gagal"
+            );
+            exit;
+        }
 
         $model = new Peminjaman();
 
@@ -394,10 +464,13 @@ class PeminjamanController
         );
 
         if ($hasil) {
+
             header(
                 "Location: index.php?url=pengembalian&status=berhasil"
             );
+
         } else {
+
             header(
                 "Location: index.php?url=pengembalian&status=gagal"
             );
@@ -406,12 +479,18 @@ class PeminjamanController
         exit;
     }
 
-    public function pengembalianPetugas()
+
+    /*
+     * DATA PENGEMBALIAN UNTUK PETUGAS
+     */
+    public static function pengembalianPetugas()
     {
-        if (
-            !isset($_SESSION['user']) ||
-            $_SESSION['user']['role'] !== 'petugas'
-        ) {
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'petugas') {
             header("Location: index.php?url=dashboard");
             exit;
         }
@@ -423,12 +502,18 @@ class PeminjamanController
         require_once __DIR__ . '/../views/pengembalian_petugas.php';
     }
 
-    public function setujuiPengembalian()
+
+    /*
+     * PETUGAS MENERIMA PENGEMBALIAN
+     */
+    public static function setujuiPengembalian()
     {
-        if (
-            !isset($_SESSION['user']) ||
-            $_SESSION['user']['role'] !== 'petugas'
-        ) {
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'petugas') {
             header("Location: index.php?url=dashboard");
             exit;
         }
@@ -449,10 +534,19 @@ class PeminjamanController
         exit;
     }
 
-    public function riwayat()
+
+    /*
+     * RIWAYAT PEMINJAMAN
+     */
+    public static function riwayat()
     {
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'peminjam') {
+            header("Location: index.php?url=dashboard");
             exit;
         }
 
@@ -465,12 +559,18 @@ class PeminjamanController
         require_once __DIR__ . '/../views/riwayat.php';
     }
 
-    public function denda()
+
+    /*
+     * DENDA
+     */
+    public static function denda()
     {
-        if (
-            !isset($_SESSION['user']) ||
-            $_SESSION['user']['role'] !== 'petugas'
-        ) {
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?url=login");
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'petugas') {
             header("Location: index.php?url=dashboard");
             exit;
         }
