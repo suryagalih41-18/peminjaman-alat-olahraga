@@ -1,4 +1,3 @@
-```php
 <?php
 
 /* =========================================================
@@ -99,6 +98,7 @@ class AlatController
         require_once __DIR__ . '/../views/alat.php';
     }
 
+
     public static function tambah()
     {
         if (!isset($_SESSION['user'])) {
@@ -117,6 +117,7 @@ class AlatController
 
         require_once __DIR__ . '/../views/alat_tambah.php';
     }
+
 
     public static function prosesTambah()
     {
@@ -148,6 +149,7 @@ class AlatController
         exit;
     }
 
+
     public static function edit()
     {
         if (!isset($_SESSION['user'])) {
@@ -172,6 +174,7 @@ class AlatController
 
         require_once __DIR__ . '/../views/alat_edit.php';
     }
+
 
     public static function prosesEdit()
     {
@@ -205,25 +208,41 @@ class AlatController
         exit;
     }
 
+
     public static function hapus()
     {
-        if (!isset($_SESSION['user'])) {
-            header("Location: index.php?url=login");
-            exit;
-        }
-
-        if ($_SESSION['user']['role'] !== 'admin') {
+        if (
+            !isset($_SESSION['user']) ||
+            $_SESSION['user']['role'] !== 'admin'
+        ) {
             header("Location: index.php?url=dashboard");
             exit;
         }
 
         $id = $_GET['id'] ?? 0;
 
+        if (!$id) {
+            header("Location: index.php?url=alat&status=gagal");
+            exit;
+        }
+
         $model = new Alat();
 
-        $model->hapus($id);
+        $hasil = $model->hapus($id);
 
-        header("Location: index.php?url=alat&status=berhasil");
+        if ($hasil) {
+
+            header(
+                "Location: index.php?url=alat&status=hapus_berhasil"
+            );
+
+        } else {
+
+            header(
+                "Location: index.php?url=alat&status=alat_dipinjam"
+            );
+        }
+
         exit;
     }
 }
@@ -398,9 +417,10 @@ class PeminjamanController
     }
 
 
-    /*
-     * MENU PENGEMBALIAN PEMINJAM
-     */
+    /* =====================================================
+       PENGEMBALIAN PEMINJAM
+    ===================================================== */
+
     public static function pengembalian()
     {
         if (!isset($_SESSION['user'])) {
@@ -415,12 +435,6 @@ class PeminjamanController
 
         $model = new Peminjaman();
 
-        /*
-         * PENTING:
-         * Ambil semua peminjaman milik user.
-         * Jadi status disetujui akan muncul
-         * dan tombol pengembalian bisa digunakan.
-         */
         $peminjaman = $model->getByUser(
             $_SESSION['user']['id']
         );
@@ -429,9 +443,10 @@ class PeminjamanController
     }
 
 
-    /*
-     * PROSES AJUKAN PENGEMBALIAN
-     */
+    /* =====================================================
+       PROSES AJUKAN PENGEMBALIAN
+    ===================================================== */
+
     public static function prosesPengembalian()
     {
         if (!isset($_SESSION['user'])) {
@@ -444,9 +459,6 @@ class PeminjamanController
             exit;
         }
 
-        /*
-         * ID bisa berasal dari GET maupun POST.
-         */
         $id = $_GET['id'] ?? $_POST['id'] ?? 0;
 
         if (!$id) {
@@ -480,9 +492,10 @@ class PeminjamanController
     }
 
 
-    /*
-     * DATA PENGEMBALIAN UNTUK PETUGAS
-     */
+    /* =====================================================
+       DATA PENGEMBALIAN PETUGAS
+    ===================================================== */
+
     public static function pengembalianPetugas()
     {
         if (!isset($_SESSION['user'])) {
@@ -503,9 +516,10 @@ class PeminjamanController
     }
 
 
-    /*
-     * PETUGAS MENERIMA PENGEMBALIAN
-     */
+    /* =====================================================
+       PETUGAS MENERIMA PENGEMBALIAN
+    ===================================================== */
+
     public static function setujuiPengembalian()
     {
         if (!isset($_SESSION['user'])) {
@@ -535,9 +549,10 @@ class PeminjamanController
     }
 
 
-    /*
-     * RIWAYAT PEMINJAMAN
-     */
+    /* =====================================================
+       RIWAYAT PEMINJAMAN
+    ===================================================== */
+
     public static function riwayat()
     {
         if (!isset($_SESSION['user'])) {
@@ -560,9 +575,10 @@ class PeminjamanController
     }
 
 
-    /*
-     * DENDA
-     */
+    /* =====================================================
+       DENDA
+    ===================================================== */
+
     public static function denda()
     {
         if (!isset($_SESSION['user'])) {

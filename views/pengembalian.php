@@ -1,4 +1,3 @@
-```php
 <?php
 
 $active = 'pengembalian';
@@ -36,7 +35,7 @@ $status = $_GET['status'] ?? '';
     </h1>
 
     <p>
-        Ajukan pengembalian alat yang sedang dipinjam.
+        Kembalikan alat yang sedang kamu pinjam.
     </p>
 
 </div>
@@ -98,67 +97,56 @@ $status = $_GET['status'] ?? '';
 
     <td>
         <?= htmlspecialchars(
-            $row['jumlah']
+            $row['jumlah'] ?? '0'
         ) ?>
     </td>
 
 
     <td>
         <?= htmlspecialchars(
-            $row['tanggal_pinjam']
+            $row['tanggal_pinjam'] ?? '-'
         ) ?>
     </td>
 
 
     <td>
         <?= htmlspecialchars(
-            $row['tanggal_rencana_kembali']
+            $row['tanggal_rencana_kembali'] ?? '-'
         ) ?>
     </td>
 
 
     <td>
 
-
-        <?php if (
-            $row['status'] === 'diajukan'
-        ): ?>
+        <?php if (($row['status'] ?? '') === 'diajukan'): ?>
 
             <span class="badge badge-warning">
                 Menunggu Persetujuan
             </span>
 
 
-        <?php elseif (
-            $row['status'] === 'disetujui'
-        ): ?>
+        <?php elseif (($row['status'] ?? '') === 'disetujui'): ?>
 
             <span class="badge badge-success">
                 Sedang Dipinjam
             </span>
 
 
-        <?php elseif (
-            $row['status'] === 'menunggu_pengembalian'
-        ): ?>
+        <?php elseif (($row['status'] ?? '') === 'menunggu_pengembalian'): ?>
 
             <span class="badge badge-warning">
                 Menunggu Petugas
             </span>
 
 
-        <?php elseif (
-            $row['status'] === 'dikembalikan'
-        ): ?>
+        <?php elseif (($row['status'] ?? '') === 'dikembalikan'): ?>
 
             <span class="badge badge-success">
                 Dikembalikan
             </span>
 
 
-        <?php elseif (
-            $row['status'] === 'ditolak'
-        ): ?>
+        <?php elseif (($row['status'] ?? '') === 'ditolak'): ?>
 
             <span class="badge badge-danger">
                 Ditolak
@@ -169,12 +157,11 @@ $status = $_GET['status'] ?? '';
 
             <span class="badge">
                 <?= htmlspecialchars(
-                    $row['status']
+                    $row['status'] ?? '-'
                 ) ?>
             </span>
 
         <?php endif; ?>
-
 
     </td>
 
@@ -182,23 +169,33 @@ $status = $_GET['status'] ?? '';
     <td>
 
 
-        <?php if (
-            $row['status'] === 'disetujui'
-        ): ?>
+        <?php if (($row['status'] ?? '') === 'disetujui'): ?>
 
 
-            <a
-                href="index.php?url=proses-pengembalian&id=<?= $row['id'] ?>"
-                class="btn btn-secondary btn-small"
-                onclick="return confirm('Yakin ingin mengajukan pengembalian alat ini?')"
+            <form
+                method="POST"
+                action="index.php?url=proses-pengembalian"
+                style="display:inline;"
             >
-                ↩ Ajukan Pengembalian
-            </a>
+
+                <input
+                    type="hidden"
+                    name="id"
+                    value="<?= htmlspecialchars($row['id']) ?>"
+                >
+
+                <button
+                    type="submit"
+                    class="btn btn-secondary btn-small"
+                    onclick="return confirm('Yakin ingin mengembalikan alat ini?')"
+                >
+                    ↩ Kembalikan
+                </button>
+
+            </form>
 
 
-        <?php elseif (
-            $row['status'] === 'menunggu_pengembalian'
-        ): ?>
+        <?php elseif (($row['status'] ?? '') === 'menunggu_pengembalian'): ?>
 
 
             <span
@@ -207,13 +204,11 @@ $status = $_GET['status'] ?? '';
                     color:#946b18;
                 "
             >
-                Pengembalian sedang diproses
+                Menunggu pemeriksaan petugas
             </span>
 
 
-        <?php elseif (
-            $row['status'] === 'dikembalikan'
-        ): ?>
+        <?php elseif (($row['status'] ?? '') === 'dikembalikan'): ?>
 
 
             <span
@@ -223,6 +218,32 @@ $status = $_GET['status'] ?? '';
                 "
             >
                 ✓ Sudah dikembalikan
+            </span>
+
+
+        <?php elseif (($row['status'] ?? '') === 'diajukan'): ?>
+
+
+            <span
+                style="
+                    font-size:12px;
+                    color:#8994a4;
+                "
+            >
+                Belum disetujui
+            </span>
+
+
+        <?php elseif (($row['status'] ?? '') === 'ditolak'): ?>
+
+
+            <span
+                style="
+                    font-size:12px;
+                    color:#b42318;
+                "
+            >
+                Peminjaman ditolak
             </span>
 
 
@@ -277,4 +298,4 @@ $status = $_GET['status'] ?? '';
 
 
 <?php require_once __DIR__ . '/footer.php'; ?>
-```
+

@@ -12,7 +12,7 @@ require_once __DIR__ . '/header.php';
     <h1>Data Peminjaman</h1>
 
     <p>
-        Kelola pengajuan peminjaman alat olahraga.
+        Daftar seluruh peminjaman alat olahraga.
     </p>
 
 </div>
@@ -32,7 +32,6 @@ require_once __DIR__ . '/header.php';
     <th>Tanggal Pinjam</th>
     <th>Rencana Kembali</th>
     <th>Status</th>
-    <th>Aksi</th>
 </tr>
 
 </thead>
@@ -47,7 +46,9 @@ require_once __DIR__ . '/header.php';
 
 <tr>
 
-    <td><?= $no++ ?></td>
+    <td>
+        <?= $no++ ?>
+    </td>
 
     <td>
         <?= htmlspecialchars(
@@ -56,48 +57,56 @@ require_once __DIR__ . '/header.php';
     </td>
 
     <td>
-        <?= htmlspecialchars($row['nama_alat'] ?? '-') ?>
+        <?= htmlspecialchars(
+            $row['nama_alat'] ?? '-'
+        ) ?>
     </td>
 
     <td>
-        <?= htmlspecialchars($row['jumlah']) ?>
+        <?= htmlspecialchars(
+            $row['jumlah'] ?? '0'
+        ) ?>
     </td>
 
     <td>
-        <?= htmlspecialchars($row['tanggal_pinjam']) ?>
+        <?= htmlspecialchars(
+            $row['tanggal_pinjam'] ?? '-'
+        ) ?>
     </td>
 
     <td>
-        <?= htmlspecialchars($row['tanggal_rencana_kembali']) ?>
+        <?= htmlspecialchars(
+            $row['tanggal_rencana_kembali'] ?? '-'
+        ) ?>
     </td>
 
     <td>
 
-        <?php if ($row['status'] === 'diajukan'): ?>
+        <?php if (($row['status'] ?? '') === 'diajukan'): ?>
 
             <span class="badge badge-warning">
                 Menunggu Persetujuan
             </span>
 
-        <?php elseif ($row['status'] === 'disetujui'): ?>
+        <?php elseif (($row['status'] ?? '') === 'disetujui'): ?>
 
             <span class="badge badge-success">
-                Disetujui
+                Dipinjam
             </span>
 
-        <?php elseif ($row['status'] === 'menunggu_pengembalian'): ?>
+        <?php elseif (($row['status'] ?? '') === 'menunggu_pengembalian'): ?>
 
             <span class="badge badge-warning">
                 Menunggu Pengembalian
             </span>
 
-        <?php elseif ($row['status'] === 'dikembalikan'): ?>
+        <?php elseif (($row['status'] ?? '') === 'dikembalikan'): ?>
 
             <span class="badge badge-success">
                 Dikembalikan
             </span>
 
-        <?php elseif ($row['status'] === 'ditolak'): ?>
+        <?php elseif (($row['status'] ?? '') === 'ditolak'): ?>
 
             <span class="badge badge-danger">
                 Ditolak
@@ -106,40 +115,9 @@ require_once __DIR__ . '/header.php';
         <?php else: ?>
 
             <span class="badge">
-                <?= htmlspecialchars($row['status']) ?>
-            </span>
-
-        <?php endif; ?>
-
-    </td>
-
-
-    <td>
-
-        <?php if ($row['status'] === 'diajukan'): ?>
-
-        <div class="action">
-
-            <a
-                href="index.php?url=setujui-peminjaman&id=<?= $row['id'] ?>"
-                class="btn btn-success btn-small"
-                onclick="return confirm('Setujui peminjaman ini?')">
-                Setujui
-            </a>
-
-            <a
-                href="index.php?url=tolak-peminjaman&id=<?= $row['id'] ?>"
-                class="btn btn-danger btn-small"
-                onclick="return confirm('Tolak peminjaman ini?')">
-                Tolak
-            </a>
-
-        </div>
-
-        <?php else: ?>
-
-            <span style="color:#8994a4;font-size:12px;">
-                -
+                <?= htmlspecialchars(
+                    $row['status'] ?? '-'
+                ) ?>
             </span>
 
         <?php endif; ?>
@@ -154,7 +132,7 @@ require_once __DIR__ . '/header.php';
 
 <tr>
 
-<td colspan="8" class="empty">
+<td colspan="7" class="empty">
     Belum ada data peminjaman.
 </td>
 
@@ -170,3 +148,4 @@ require_once __DIR__ . '/header.php';
 
 
 <?php require_once __DIR__ . '/footer.php'; ?>
+

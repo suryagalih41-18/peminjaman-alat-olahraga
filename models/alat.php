@@ -83,6 +83,23 @@ class Alat
     }
 
     // Edit alat
+    public function edit(
+        $id,
+        $nama_alat,
+        $kategori_id,
+        $stok,
+        $kondisi
+    ) {
+        return $this->update(
+            $id,
+            $nama_alat,
+            $kategori_id,
+            $stok,
+            $kondisi
+        );
+    }
+
+    // Update alat
     public function update(
         $id,
         $nama_alat,
@@ -112,11 +129,36 @@ class Alat
     // Hapus alat
     public function hapus($id)
     {
-        $query = $this->db->prepare("
-            DELETE FROM alat
-            WHERE id = ?
-        ");
+        try {
 
-        return $query->execute([$id]);
+            // Cek apakah alat sudah digunakan dalam peminjaman
+            $cek = $this->db->prepare("
+                SELECT COUNT(*) AS total
+                FROM peminjaman
+                WHERE alat_id = ?
+            ");
+
+            $cek->execute([$id]);
+
+            $data = $cek->fetch(PDO::FETCH_ASSOC);
+
+            // Jika sudah pernah digunakan dalam peminjaman
+            if (($data['total'] ?? 0) > 0) {
+                return false;
+            }
+
+            // Jika belum pernah digunakan, hapus alat
+            $query = $this->db->prepare("
+                DELETE FROM alat
+                WHERE id = ?
+            ");
+
+            return $query->execute([$id]);
+
+        } catch (PDOException $e) {
+
+            // Jika database menolak karena foreign key
+            return false;
+        }
     }
 }

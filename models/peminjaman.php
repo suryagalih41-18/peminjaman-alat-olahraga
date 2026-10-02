@@ -4,16 +4,20 @@ class Peminjaman
 {
     private $db;
 
+
     public function __construct()
     {
         $this->db = (new Database())->connect();
     }
 
 
+    /*
+     * MENGAMBIL SEMUA DATA PEMINJAMAN
+     */
     public function getAll()
     {
         $sql = "
-            SELECT 
+            SELECT
                 p.*,
                 u.nama_lengkap,
                 u.username,
@@ -32,10 +36,13 @@ class Peminjaman
     }
 
 
+    /*
+     * MENGAMBIL DATA PEMINJAMAN BERDASARKAN USER
+     */
     public function getByUser($user_id)
     {
         $sql = "
-            SELECT 
+            SELECT
                 p.*,
                 a.nama_alat
             FROM peminjaman p
@@ -54,6 +61,16 @@ class Peminjaman
     }
 
 
+    /*
+     * MENAMBAH PEMINJAMAN
+     *
+     * Status langsung menjadi:
+     * disetujui
+     *
+     * Jadi peminjam langsung dapat
+     * menggunakan alat dan dapat
+     * mengajukan pengembalian.
+     */
     public function tambah(
         $user_id,
         $alat_id,
@@ -66,6 +83,9 @@ class Peminjaman
             $this->db->beginTransaction();
 
 
+            /*
+             * Cek stok alat
+             */
             $query = $this->db->prepare(
                 "SELECT stok
                  FROM alat
@@ -80,6 +100,9 @@ class Peminjaman
             $alat = $query->fetch(PDO::FETCH_ASSOC);
 
 
+            /*
+             * Alat tidak ditemukan
+             */
             if (!$alat) {
 
                 $this->db->rollBack();
@@ -88,6 +111,9 @@ class Peminjaman
             }
 
 
+            /*
+             * Stok tidak cukup
+             */
             if ($alat['stok'] < $jumlah) {
 
                 $this->db->rollBack();
@@ -97,7 +123,7 @@ class Peminjaman
 
 
             /*
-             * Kurangi stok ketika pengajuan dibuat.
+             * Kurangi stok ketika peminjaman dibuat.
              */
             $query = $this->db->prepare(
                 "UPDATE alat
@@ -112,8 +138,9 @@ class Peminjaman
 
 
             /*
-             * Masukkan peminjaman
-             * dengan status diajukan.
+             * Masukkan peminjaman.
+             *
+             * STATUS LANGSUNG DISETUJUI
              */
             $query = $this->db->prepare(
                 "INSERT INTO peminjaman
@@ -125,7 +152,7 @@ class Peminjaman
                     tanggal_rencana_kembali,
                     status
                 )
-                VALUES (?, ?, ?, ?, ?, 'diajukan')"
+                VALUES (?, ?, ?, ?, ?, 'disetujui')"
             );
 
             $query->execute([
@@ -141,6 +168,7 @@ class Peminjaman
 
             return true;
 
+
         } catch (Exception $e) {
 
             if ($this->db->inTransaction()) {
@@ -152,6 +180,12 @@ class Peminjaman
     }
 
 
+    /*
+     * MENYETUJUI PEMINJAMAN
+     *
+     * Method ini tetap dipertahankan
+     * untuk menjaga controller yang sudah ada.
+     */
     public function setujuiPeminjaman(
         $id,
         $petugas_id
@@ -171,6 +205,12 @@ class Peminjaman
     }
 
 
+    /*
+     * MENOLAK PEMINJAMAN
+     *
+     * Jika masih ada data lama dengan status
+     * diajukan, method ini tetap bisa digunakan.
+     */
     public function tolakPeminjaman(
         $id,
         $petugas_id
@@ -180,6 +220,9 @@ class Peminjaman
             $this->db->beginTransaction();
 
 
+            /*
+             * Ambil peminjaman yang masih diajukan.
+             */
             $query = $this->db->prepare(
                 "SELECT *
                  FROM peminjaman
@@ -192,10 +235,12 @@ class Peminjaman
                 $id
             ]);
 
-            $peminjaman =
-                $query->fetch(PDO::FETCH_ASSOC);
+            $peminjaman = $query->fetch(PDO::FETCH_ASSOC);
 
 
+            /*
+             * Data tidak ditemukan.
+             */
             if (!$peminjaman) {
 
                 $this->db->rollBack();
@@ -220,6 +265,9 @@ class Peminjaman
             ]);
 
 
+            /*
+             * Ubah status menjadi ditolak.
+             */
             $query = $this->db->prepare(
                 "UPDATE peminjaman
                  SET status = 'ditolak',
@@ -236,6 +284,7 @@ class Peminjaman
             $this->db->commit();
 
             return true;
+
 
         } catch (Exception $e) {
 
@@ -270,17 +319,23 @@ class Peminjaman
     }
 
 
+    /*
+     * METHOD TAMBAHAN UNTUK PENGEMBALIAN
+     */
     public function ajukanPengembalian($id)
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
+
         if (!isset($_SESSION['user']['id'])) {
             return false;
         }
 
+
         $user_id = $_SESSION['user']['id'];
+
 
         return $this->kembalikan(
             $id,
@@ -309,6 +364,7 @@ class Peminjaman
             ORDER BY p.id DESC
         ";
 
+
         $query = $this->db->prepare($sql);
 
         $query->execute();
@@ -329,6 +385,10 @@ class Peminjaman
             $this->db->beginTransaction();
 
 
+            /*
+             * Ambil data yang sedang menunggu
+             * pengembalian.
+             */
             $query = $this->db->prepare(
                 "SELECT *
                  FROM peminjaman
@@ -337,14 +397,19 @@ class Peminjaman
                  FOR UPDATE"
             );
 
+
             $query->execute([
                 $id
             ]);
+
 
             $peminjaman =
                 $query->fetch(PDO::FETCH_ASSOC);
 
 
+            /*
+             * Data tidak ditemukan.
+             */
             if (!$peminjaman) {
 
                 $this->db->rollBack();
@@ -362,6 +427,7 @@ class Peminjaman
                  WHERE id = ?"
             );
 
+
             $query->execute([
                 $peminjaman['jumlah'],
                 $peminjaman['alat_id']
@@ -378,6 +444,7 @@ class Peminjaman
                  WHERE id = ?"
             );
 
+
             $query->execute([
                 $petugas_id,
                 $id
@@ -387,6 +454,7 @@ class Peminjaman
             $this->db->commit();
 
             return true;
+
 
         } catch (Exception $e) {
 
@@ -400,7 +468,7 @@ class Peminjaman
 
 
     /*
-     * DATA AKTIF
+     * DATA PEMINJAMAN AKTIF
      */
     public function getAktifByUser($user_id)
     {
@@ -419,11 +487,13 @@ class Peminjaman
             ORDER BY p.id DESC
         ";
 
+
         $query = $this->db->prepare($sql);
 
         $query->execute([
             $user_id
         ]);
+
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -443,6 +513,9 @@ class Peminjaman
 
         foreach ($data as $row) {
 
+            /*
+             * Tidak ada tanggal kembali.
+             */
             if (
                 empty(
                     $row['tanggal_rencana_kembali']
@@ -452,6 +525,10 @@ class Peminjaman
             }
 
 
+            /*
+             * Jika sudah dikembalikan,
+             * tidak dihitung sebagai denda.
+             */
             if (
                 $row['status'] === 'dikembalikan'
             ) {
@@ -465,6 +542,9 @@ class Peminjaman
                 );
 
 
+            /*
+             * Cek keterlambatan.
+             */
             if ($hariIni > $tanggalKembali) {
 
                 $selisih =
@@ -472,8 +552,10 @@ class Peminjaman
                         $hariIni
                     );
 
+
                 $hariTerlambat =
                     $selisih->days;
+
 
                 $denda =
                     $hariTerlambat * 5000;
@@ -482,8 +564,10 @@ class Peminjaman
                 $row['hari_terlambat'] =
                     $hariTerlambat;
 
+
                 $row['denda'] =
                     $denda;
+
 
                 $hasil[] = $row;
             }

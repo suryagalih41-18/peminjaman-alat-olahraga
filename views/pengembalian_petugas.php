@@ -12,7 +12,7 @@ require_once __DIR__ . '/header.php';
     <h1>Data Pengembalian</h1>
 
     <p>
-        Daftar pengembalian alat yang menunggu pemeriksaan petugas.
+        Daftar pengembalian alat yang diajukan oleh peminjam.
     </p>
 
 </div>
@@ -37,6 +37,7 @@ require_once __DIR__ . '/header.php';
 
 </thead>
 
+
 <tbody>
 
 <?php if (!empty($peminjaman)): ?>
@@ -47,13 +48,17 @@ require_once __DIR__ . '/header.php';
 
 <tr>
 
-    <td><?= $no++ ?></td>
+    <td>
+        <?= $no++ ?>
+    </td>
+
 
     <td>
         <?= htmlspecialchars(
-            $row['nama_lengkap'] ?? '-'
+            $row['nama_lengkap'] ?? $row['username'] ?? '-'
         ) ?>
     </td>
+
 
     <td>
         <?= htmlspecialchars(
@@ -61,17 +66,27 @@ require_once __DIR__ . '/header.php';
         ) ?>
     </td>
 
-    <td>
-        <?= htmlspecialchars($row['jumlah']) ?>
-    </td>
 
     <td>
-        <?= htmlspecialchars($row['tanggal_pinjam']) ?>
+        <?= htmlspecialchars(
+            $row['jumlah'] ?? '0'
+        ) ?>
     </td>
 
+
     <td>
-        <?= htmlspecialchars($row['tanggal_rencana_kembali']) ?>
+        <?= htmlspecialchars(
+            $row['tanggal_pinjam'] ?? '-'
+        ) ?>
     </td>
+
+
+    <td>
+        <?= htmlspecialchars(
+            $row['tanggal_rencana_kembali'] ?? '-'
+        ) ?>
+    </td>
+
 
     <td>
 
@@ -81,13 +96,15 @@ require_once __DIR__ . '/header.php';
 
     </td>
 
+
     <td>
 
         <a
-            href="index.php?url=setujui-pengembalian&id=<?= $row['id'] ?>"
+            href="index.php?url=setujui-pengembalian&id=<?= htmlspecialchars($row['id']) ?>"
             class="btn btn-success btn-small"
-            onclick="return confirm('Terima pengembalian alat ini?')">
-            Terima Pengembalian
+            onclick="return confirm('Yakin alat ini sudah dikembalikan oleh peminjam?')"
+        >
+            ✓ Terima Pengembalian
         </a>
 
     </td>
@@ -96,13 +113,14 @@ require_once __DIR__ . '/header.php';
 
 <?php endforeach; ?>
 
+
 <?php else: ?>
 
 <tr>
 
-<td colspan="8" class="empty">
-    Belum ada pengembalian yang menunggu.
-</td>
+    <td colspan="8" class="empty">
+        Belum ada pengembalian yang menunggu.
+    </td>
 
 </tr>
 
@@ -116,3 +134,4 @@ require_once __DIR__ . '/header.php';
 
 
 <?php require_once __DIR__ . '/footer.php'; ?>
+

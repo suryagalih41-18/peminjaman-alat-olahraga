@@ -9,10 +9,20 @@ $status = $_GET['status'] ?? '';
 
 ?>
 
-<?php if ($status === 'berhasil'): ?>
+<!-- NOTIFIKASI -->
+
+<?php if ($status === 'berhasil' || $status === 'hapus_berhasil'): ?>
 
 <div class="alert alert-success">
-    Data alat berhasil diproses.
+    ✅ <strong>Alat berhasil dihapus.</strong>
+</div>
+
+<?php elseif ($status === 'alat_dipinjam'): ?>
+
+<div class="alert alert-warning">
+    ⚠️ <strong>Alat tidak bisa dihapus!</strong><br>
+    Alat ini masih memiliki data peminjaman.
+    Selesaikan peminjaman terlebih dahulu.
 </div>
 
 <?php endif; ?>
@@ -102,12 +112,15 @@ $status = $_GET['status'] ?? '';
 
         <div class="action">
 
+            <!-- TOMBOL EDIT -->
             <a
                 href="index.php?url=edit-alat&id=<?= $row['id'] ?>"
                 class="btn btn-secondary btn-small">
                 Edit
             </a>
 
+
+            <!-- TOMBOL HAPUS -->
             <a
                 href="index.php?url=hapus-alat&id=<?= $row['id'] ?>"
                 class="btn btn-danger btn-small"
@@ -144,6 +157,32 @@ $status = $_GET['status'] ?? '';
 </table>
 
 </div>
+
+
+<!-- CSS NOTIFIKASI -->
+
+<style>
+
+.alert {
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffe69c;
+}
+
+</style>
 
 
 <?php require_once __DIR__ . '/footer.php'; ?>
