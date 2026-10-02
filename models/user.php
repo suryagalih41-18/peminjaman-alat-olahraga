@@ -12,7 +12,9 @@ class User
     public function login($username, $password)
     {
         $query = $this->db->prepare(
-            "SELECT * FROM users WHERE username = ? LIMIT 1"
+            "SELECT * FROM users
+             WHERE BINARY username = ?
+             LIMIT 1"
         );
 
         $query->execute([$username]);
@@ -32,7 +34,8 @@ class User
         $nama_lengkap
     ) {
         $cek = $this->db->prepare(
-            "SELECT id FROM users WHERE username = ?"
+            "SELECT id FROM users
+             WHERE BINARY username = ?"
         );
 
         $cek->execute([$username]);
