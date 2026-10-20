@@ -1,22 +1,19 @@
-<?php
 
+<?php
 session_start();
 
 require_once __DIR__ . '/../config/database.php';
-
 require_once __DIR__ . '/../models/user.php';
 require_once __DIR__ . '/../models/alat.php';
 require_once __DIR__ . '/../models/kategori.php';
 require_once __DIR__ . '/../models/peminjaman.php';
-
 require_once __DIR__ . '/../controllers/controller.php';
-
+require_once __DIR__ . '/../controllers/revisi_controller.php';
 
 $url = $_GET['url'] ?? 'login';
 
-
 switch ($url) {
-
+    // LOGIN DAN REGISTER
     case 'login':
         (new AuthController())->login();
         break;
@@ -33,19 +30,35 @@ switch ($url) {
         (new AuthController())->prosesRegister();
         break;
 
-
-    case 'dashboard':
-
-        if (!isset($_SESSION['user'])) {
-            header("Location: index.php?url=login");
-            exit;
+    case 'logout':
+        try {
+            if (isset($_SESSION['user']['id'])) {
+                $db = (new Database())->connect();
+                $stmt = $db->prepare(
+                    'INSERT INTO log_aktivitas (user_id, aktivitas, waktu)
+                     VALUES (?, ?, NOW())'
+                );
+                $stmt->execute([
+                    $_SESSION['user']['id'],
+                    'Logout dari sistem'
+                ]);
+            }
+        } catch (Throwable $e) {
+            error_log($e->getMessage());
         }
 
-        require_once __DIR__ . '/../views/dashboard.php';
+        $_SESSION = [];
+        session_destroy();
 
+        header('Location: index.php?url=login');
+        exit;
+
+    // DASHBOARD
+    case 'dashboard':
+        (new RevisiController())->dashboard();
         break;
 
-
+    // DATA ALAT
     case 'alat':
         (new AlatController())->index();
         break;
@@ -55,7 +68,7 @@ switch ($url) {
         break;
 
     case 'proses-tambah-alat':
-        (new AlatController())->prosesTambah();
+        (new AlatController())->simpan();
         break;
 
     case 'edit-alat':
@@ -63,19 +76,19 @@ switch ($url) {
         break;
 
     case 'proses-edit-alat':
-        (new AlatController())->prosesEdit();
+        (new AlatController())->update();
         break;
 
     case 'hapus-alat':
         (new AlatController())->hapus();
         break;
 
-
+    // DATA PEMINJAM
     case 'peminjam':
-        UserController::peminjam();
+        (new UserController())->index();
         break;
 
-
+    // DATA PEMINJAMAN
     case 'peminjaman':
         (new PeminjamanController())->index();
         break;
@@ -85,18 +98,22 @@ switch ($url) {
         break;
 
     case 'proses-pengajuan':
-        (new PeminjamanController())->prosesTambah();
+        (new RevisiController())->prosesPengajuan();
+        break;
+
+    case 'persetujuan-peminjaman':
+        (new RevisiController())->halamanPersetujuan();
         break;
 
     case 'setujui-peminjaman':
-        (new PeminjamanController())->setujuiPeminjaman();
+        (new RevisiController())->setujuiPeminjaman();
         break;
 
     case 'tolak-peminjaman':
-        (new PeminjamanController())->tolakPeminjaman();
+        (new RevisiController())->tolakPeminjaman();
         break;
 
-
+    // PENGEMBALIAN
     case 'pengembalian':
         (new PeminjamanController())->pengembalian();
         break;
@@ -113,7 +130,7 @@ switch ($url) {
         (new PeminjamanController())->setujuiPengembalian();
         break;
 
-
+    // RIWAYAT DAN DENDA
     case 'riwayat':
         (new PeminjamanController())->riwayat();
         break;
@@ -122,20 +139,20 @@ switch ($url) {
         (new PeminjamanController())->denda();
         break;
 
-
-    case 'logout':
-
-        session_unset();
-        session_destroy();
-
-        header("Location: index.php?url=login");
-        exit;
-
+    // LAPORAN DAN LOG AKTIVITAS
+    case 'laporan-peminjaman':
+        (new RevisiController())->laporan();
         break;
 
+    case 'log-aktivitas':
+        (new RevisiController())->logAktivitas();
+        break;
 
     default:
-
-        header("Location: index.php?url=login");
+        if (isset($_SESSION['user'])) {
+            header('Location: index.php?url=dashboard');
+        } else {
+            header('Location: index.php?url=login');
+        }
         exit;
 }

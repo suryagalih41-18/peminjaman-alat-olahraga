@@ -97,17 +97,25 @@ require_once __DIR__ . '/header.php';
     </td>
 
 
-    <td>
-
-        <a
-            href="index.php?url=setujui-pengembalian&id=<?= htmlspecialchars($row['id']) ?>"
-            class="btn btn-success btn-small"
-            onclick="return confirm('Yakin alat ini sudah dikembalikan oleh peminjam?')"
+    
+<td>
+    <form
+        action="index.php?url=setujui-pengembalian"
+        method="POST"
+        onsubmit="return confirm('Yakin alat ini sudah dikembalikan oleh peminjam?');"
+    >
+        <input
+            type="hidden"
+            name="id"
+            value="<?= (int) $row['id'] ?>"
         >
-            ✓ Terima Pengembalian
-        </a>
 
-    </td>
+        <button type="submit" class="btn btn-success btn-small">
+            ✓ Terima Pengembalian
+        </button>
+    </form>
+</td>
+
 
 </tr>
 

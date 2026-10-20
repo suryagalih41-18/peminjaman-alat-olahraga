@@ -10,13 +10,10 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title><?= htmlspecialchars($pageTitle) ?> - Peminjaman Alat Olahraga</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -25,9 +22,7 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             color: #26364d;
         }
 
-        a {
-            text-decoration: none;
-        }
+        a { text-decoration: none; }
 
         .topbar {
             position: fixed;
@@ -35,7 +30,7 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             left: 0;
             right: 0;
             height: 65px;
-            background: #ffffff;
+            background: #fff;
             border-bottom: 1px solid #e4e8ee;
             display: flex;
             align-items: center;
@@ -50,14 +45,8 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             color: #263b5a;
         }
 
-        .welcome {
-            color: #65748b;
-            font-size: 14px;
-        }
-
-        .welcome strong {
-            color: #263b5a;
-        }
+        .welcome { color: #65748b; font-size: 14px; }
+        .welcome strong { color: #263b5a; }
 
         .sidebar {
             position: fixed;
@@ -69,10 +58,12 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             color: white;
             z-index: 1100;
             padding: 22px 15px;
+            overflow-y: auto;
+            padding-bottom: 105px;
         }
 
         .brand {
-            height: 78px;
+            min-height: 78px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -83,6 +74,7 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
         .brand-icon {
             width: 43px;
             height: 43px;
+            flex-shrink: 0;
             border-radius: 50%;
             background: white;
             display: flex;
@@ -91,16 +83,8 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             font-size: 23px;
         }
 
-        .brand-name {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .brand-sub {
-            font-size: 11px;
-            margin-top: 3px;
-            color: #d6e0ed;
-        }
+        .brand-name { font-size: 18px; font-weight: bold; }
+        .brand-sub { font-size: 11px; margin-top: 3px; color: #d6e0ed; }
 
         .menu-title {
             font-size: 11px;
@@ -121,9 +105,7 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             transition: .2s;
         }
 
-        .menu a:hover {
-            background: #38577f;
-        }
+        .menu a:hover { background: #38577f; }
 
         .menu a.active {
             background: white;
@@ -132,30 +114,24 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
 
         .menu-icon {
             width: 22px;
+            flex-shrink: 0;
             text-align: center;
             font-size: 17px;
         }
 
         .user-box {
-            position: absolute;
+            position: fixed;
             left: 15px;
-            right: 15px;
             bottom: 18px;
+            width: 208px;
             background: #34547d;
             padding: 14px;
             border-radius: 8px;
+            z-index: 1200;
         }
 
-        .user-name {
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .user-role {
-            font-size: 11px;
-            color: #d9e4f0;
-            margin-top: 3px;
-        }
+        .user-name { font-size: 14px; font-weight: bold; }
+        .user-role { font-size: 11px; color: #d9e4f0; margin-top: 3px; }
 
         .main {
             margin-left: 238px;
@@ -163,9 +139,7 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             min-height: 100vh;
         }
 
-        .content {
-            padding: 32px 30px 45px;
-        }
+        .content { padding: 32px 30px 45px; }
 
         .page-card {
             background: white;
@@ -175,16 +149,12 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             margin-bottom: 25px;
         }
 
-        .page-card h1,
-        .page-card h2 {
+        .page-card h1, .page-card h2 {
             margin: 0 0 7px;
             color: #263b5a;
         }
 
-        .page-card p {
-            margin: 0;
-            color: #64748b;
-        }
+        .page-card p { margin: 0; color: #64748b; }
 
         .btn {
             display: inline-block;
@@ -197,30 +167,12 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             cursor: pointer;
         }
 
-        .btn:hover {
-            opacity: .9;
-        }
-
-        .btn-primary {
-            background: #263b5a;
-        }
-
-        .btn-success {
-            background: #3d8b62;
-        }
-
-        .btn-danger {
-            background: #9b3d3d;
-        }
-
-        .btn-secondary {
-            background: #607a9d;
-        }
-
-        .btn-small {
-            padding: 8px 13px;
-            font-size: 12px;
-        }
+        .btn:hover { opacity: .9; }
+        .btn-primary { background: #263b5a; }
+        .btn-success { background: #3d8b62; }
+        .btn-danger { background: #9b3d3d; }
+        .btn-secondary { background: #607a9d; }
+        .btn-small { padding: 8px 13px; font-size: 12px; }
 
         .table-card {
             background: white;
@@ -230,10 +182,7 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             overflow-x: auto;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        table { width: 100%; border-collapse: collapse; }
 
         th {
             background: #263b5a;
@@ -250,9 +199,7 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             color: #303b4d;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
+        tr:last-child td { border-bottom: none; }
 
         .badge {
             display: inline-block;
@@ -263,32 +210,12 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             font-size: 12px;
         }
 
-        .badge-success {
-            background: #e5f5eb;
-            color: #267348;
-        }
+        .badge-success { background: #e5f5eb; color: #267348; }
+        .badge-warning { background: #fff4dc; color: #946b18; }
+        .badge-danger { background: #fae6e6; color: #9b3d3d; }
 
-        .badge-warning {
-            background: #fff4dc;
-            color: #946b18;
-        }
-
-        .badge-danger {
-            background: #fae6e6;
-            color: #9b3d3d;
-        }
-
-        .action {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
-        .empty {
-            text-align: center;
-            padding: 35px;
-            color: #7b8798;
-        }
+        .action { display: flex; gap: 5px; flex-wrap: wrap; }
+        .empty { text-align: center; padding: 35px; color: #7b8798; }
 
         .alert {
             padding: 12px 15px;
@@ -297,15 +224,8 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             font-size: 13px;
         }
 
-        .alert-success {
-            background: #e6f5eb;
-            color: #267348;
-        }
-
-        .alert-danger {
-            background: #fae7e7;
-            color: #963e3e;
-        }
+        .alert-success { background: #e6f5eb; color: #267348; }
+        .alert-danger { background: #fae7e7; color: #963e3e; }
 
         .form-card {
             max-width: 650px;
@@ -316,9 +236,7 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             padding: 28px;
         }
 
-        .form-group {
-            margin-bottom: 18px;
-        }
+        .form-group { margin-bottom: 18px; }
 
         label {
             display: block;
@@ -328,9 +246,7 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             margin-bottom: 7px;
         }
 
-        input,
-        select,
-        textarea {
+        input, select, textarea {
             width: 100%;
             border: 1px solid #d6dce5;
             border-radius: 7px;
@@ -341,35 +257,26 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             background: white;
         }
 
-        input:focus,
-        select:focus,
-        textarea:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: #607a9d;
         }
 
-        .form-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 20px;
-        }
+        .form-actions { display: flex; gap: 8px; margin-top: 20px; }
 
         @media(max-width: 800px) {
+            .sidebar { width: 200px; }
+            .main { margin-left: 200px; }
+            .topbar { padding-left: 220px; }
+            .content { padding: 25px 18px; }
+            .user-box { width: 170px; }
+        }
 
-            .sidebar {
-                width: 200px;
+        @media print {
+            .sidebar, .topbar, header, footer {
+                display: none !important;
             }
-
-            .main {
-                margin-left: 200px;
-            }
-
-            .topbar {
-                padding-left: 220px;
-            }
-
-            .content {
-                padding: 25px 18px;
-            }
+            .main { margin: 0; padding: 0; }
+            .content { padding: 0; }
         }
     </style>
 </head>
@@ -380,7 +287,6 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
 
     <div class="brand">
         <div class="brand-icon">⚽</div>
-
         <div>
             <div class="brand-name">Peminjaman</div>
             <div class="brand-sub">Alat Olahraga</div>
@@ -396,7 +302,6 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
             <span class="menu-icon">🏠</span>
             <span>Dashboard</span>
         </a>
-
 
         <?php if ($role === 'admin'): ?>
 
@@ -418,12 +323,30 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
                 <span>Data Peminjam</span>
             </a>
 
+            <a href="index.php?url=laporan-peminjaman"
+               class="<?= $active === 'laporan-peminjaman' ? 'active' : '' ?>">
+                <span class="menu-icon">🖨️</span>
+                <span>Cetak Laporan</span>
+            </a>
+
+            <a href="index.php?url=log-aktivitas"
+               class="<?= $active === 'log-aktivitas' ? 'active' : '' ?>">
+                <span class="menu-icon">📊</span>
+                <span>Log Aktivitas</span>
+            </a>
+
         <?php elseif ($role === 'petugas'): ?>
 
             <a href="index.php?url=peminjaman"
                class="<?= $active === 'peminjaman' ? 'active' : '' ?>">
                 <span class="menu-icon">📋</span>
                 <span>Data Peminjaman</span>
+            </a>
+
+            <a href="index.php?url=persetujuan-peminjaman"
+               class="<?= $active === 'persetujuan-peminjaman' ? 'active' : '' ?>">
+                <span class="menu-icon">✅</span>
+                <span>Persetujuan Peminjaman</span>
             </a>
 
             <a href="index.php?url=pengembalian-petugas"
@@ -466,7 +389,6 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
 
         <?php endif; ?>
 
-
         <a href="index.php?url=logout">
             <span class="menu-icon">🚪</span>
             <span>Logout</span>
@@ -474,36 +396,26 @@ $pageTitle = $pageTitle ?? 'Peminjaman Alat Olahraga';
 
     </div>
 
-
     <div class="user-box">
-
         <div class="user-name">
             👤 <?= htmlspecialchars($namaUser) ?>
         </div>
-
         <div class="user-role">
             <?= ucfirst(htmlspecialchars($role)) ?>
         </div>
-
     </div>
 
 </div>
 
-
 <div class="topbar">
-
     <div class="topbar-title">
         <?= htmlspecialchars($pageTitle) ?>
     </div>
-
     <div class="welcome">
         Selamat datang,
         <strong><?= htmlspecialchars($namaUser) ?></strong>
     </div>
-
 </div>
 
-
 <div class="main">
-
     <div class="content">
