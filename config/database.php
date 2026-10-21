@@ -2,10 +2,10 @@
 
 class Database
 {
-    private $host = "sql310.infinityfree.com";
-    private $db_name = "if0_43212603_db_peminjaman_olahraga";
-    private $username = "if0_43212603";
-    private $password = "SuryaGalih123";
+    private $host = "localhost";
+    private $db_name = "db_peminjaman_olahraga";
+    private $username = "root";
+    private $password = "";
     private $conn;
 
     public function connect()
