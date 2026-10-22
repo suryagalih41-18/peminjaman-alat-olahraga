@@ -419,23 +419,44 @@ class RevisiController
     }
 
     // LOG AKTIVITAS
-    public function logAktivitas()
-    {
-        $this->wajibAdminPetugas();
+  
+public function logAktivitas()
+{
+    $this->wajibAdminPetugas();
 
+    try {
         $db = $this->db();
 
         $stmt = $db->query(
-            "SELECT l.id, l.aktivitas, l.waktu,
-                    u.nama_lengkap, u.username, u.role
-             FROM log_aktivitas l
-             LEFT JOIN users u ON u.id = l.user_id
+            "SELECT
+                l.id,
+                l.aktivitas,
+                l.waktu,
+                u.nama_lengkap,
+                u.username,
+                u.role
+             FROM log_aktivitas AS l
+             LEFT JOIN users AS u ON u.id = l.user_id
              ORDER BY l.id DESC
              LIMIT 500"
         );
 
         $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        $active = 'log-aktivitas';
+        $pageTitle = 'Log Aktivitas';
+
         require __DIR__ . '/../views/log_aktivitas.php';
+
+    } catch (Throwable $e) {
+        error_log('Log Aktivitas: ' . $e->getMessage());
+
+        echo '<div style="padding:20px;font-family:Arial,sans-serif">';
+        echo '<h2>Log Aktivitas gagal dimuat</h2>';
+        echo '<p>Terjadi kesalahan saat mengambil data. Periksa error log hosting.</p>';
+        echo '<a href="index.php?url=dashboard">Kembali ke Dashboard</a>';
+        echo '</div>';
     }
+}
+
 }
