@@ -420,43 +420,42 @@ class RevisiController
 
     // LOG AKTIVITAS
   
+
 public function logAktivitas()
 {
     $this->wajibAdminPetugas();
+
+    $active = 'log-aktivitas';
+    $pageTitle = 'Log Aktivitas';
 
     try {
         $db = $this->db();
 
         $stmt = $db->query(
-            "SELECT
-                l.id,
-                l.aktivitas,
-                l.waktu,
-                u.nama_lengkap,
-                u.username,
-                u.role
-             FROM log_aktivitas AS l
-             LEFT JOIN users AS u ON u.id = l.user_id
+            "SELECT l.id, l.aktivitas, l.waktu,
+                    u.nama_lengkap, u.username, u.role
+             FROM log_aktivitas l
+             LEFT JOIN users u ON u.id = l.user_id
              ORDER BY l.id DESC
              LIMIT 500"
         );
 
         $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $active = 'log-aktivitas';
-        $pageTitle = 'Log Aktivitas';
-
         require __DIR__ . '/../views/log_aktivitas.php';
 
     } catch (Throwable $e) {
         error_log('Log Aktivitas: ' . $e->getMessage());
 
-        echo '<div style="padding:20px;font-family:Arial,sans-serif">';
+        http_response_code(500);
+
         echo '<h2>Log Aktivitas gagal dimuat</h2>';
-        echo '<p>Terjadi kesalahan saat mengambil data. Periksa error log hosting.</p>';
-        echo '<a href="index.php?url=dashboard">Kembali ke Dashboard</a>';
-        echo '</div>';
+        echo '<p>Pesan error: ' .
+            htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') .
+            '</p>';
+        echo '<p><a href="index.php?url=dashboard">Kembali ke Dashboard</a></p>';
     }
 }
+
 
 }
